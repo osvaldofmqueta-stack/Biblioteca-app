@@ -168,8 +168,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Painel esquerdo -->
     <div class="login-brand d-none d-md-flex">
-        <div class="brand-icon"><i class="fas fa-book-open"></i></div>
+        <img src="/images/ispcan.png" alt="Brasão ISPCAN"
+             style="width:120px;height:120px;object-fit:contain;border-radius:50%;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.35);margin-bottom:1.75rem;">
         <h1>Sistema de<br>Biblioteca</h1>
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);letter-spacing:.3px;margin-bottom:.4rem;">
+            Instituto Superior Politécnico<br>Cardeal do Nascimento — ISPCAN
+        </p>
         <p>Plataforma de gestão de livros, empréstimos e utilizadores de forma simples e eficiente.</p>
         <ul class="feature-list">
             <li><i class="fas fa-check-circle"></i> Gestão completa de livros</li>

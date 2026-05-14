@@ -444,6 +444,28 @@ body {
 .nav-dd-danger { color: rgba(248,113,113,0.85) !important; }
 .nav-dd-danger:hover { background: rgba(239,68,68,0.12) !important; color: #fca5a5 !important; }
 
+/* ===== BRASÃO ===== */
+.dashboard-brasao {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    border-radius: 50%;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.14);
+    flex-shrink: 0;
+    background: #fff;
+    padding: 3px;
+    border: 2px solid #e8eaf0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.dashboard-brasao:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+}
+body.dark-mode .dashboard-brasao {
+    background: #252538;
+    border-color: #2d2d45;
+}
+
 /* ===== OVERDUE ALERTS ===== */
 .overdue-pill {
     display: inline-flex; align-items: center; gap: 6px;

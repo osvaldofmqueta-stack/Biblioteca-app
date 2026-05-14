@@ -19,16 +19,20 @@ $nAtrasos     = count($notificacoes);
 
     <!-- Cabeçalho -->
     <div class="page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
-        <div>
-            <h1>
-                <?php
-                if (isAdmin()) echo 'Bem-vindo, Administrador';
-                elseif (isBibliotecario()) echo 'Bem-vindo, Bibliotecário';
-                else echo 'Bem-vindo';
-                ?>
-                <span style="font-size:1.2rem;">&#128075;</span>
-            </h1>
-            <p>Gerencie a sua biblioteca de forma eficiente. Hoje é <?php echo date('d \d\e F \d\e Y'); ?>.</p>
+        <div class="d-flex align-items-center gap-3">
+            <img src="/images/ispcan.png" alt="Brasão ISPCAN" class="dashboard-brasao">
+            <div>
+                <h1>
+                    <?php
+                    if (isAdmin()) echo 'Bem-vindo, Administrador';
+                    elseif (isBibliotecario()) echo 'Bem-vindo, Bibliotecário';
+                    else echo 'Bem-vindo';
+                    ?>
+                    <span style="font-size:1.2rem;">&#128075;</span>
+                </h1>
+                <p style="margin:0;">Gerencie a sua biblioteca de forma eficiente. Hoje é <?php echo date('d \d\e F \d\e Y'); ?>.</p>
+                <p style="font-size:0.75rem;color:#9ca3af;margin:2px 0 0;">Instituto Superior Politécnico Cardeal do Nascimento — ISPCAN</p>
+            </div>
         </div>
         <?php if ($nAtrasos > 0): ?>
         <div class="overdue-pill">
