@@ -21,7 +21,7 @@ $nAtrasos     = count($notificacoes);
     <!-- Cabeçalho -->
     <div class="page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-3">
-            <img src="/images/ispcan.png" alt="Brasão ISPCAN" class="dashboard-brasao">
+            <img src="<?= BASE_URL ?>/images/ispcan.png" alt="Brasão ISPCAN" class="dashboard-brasao">
             <div>
                 <h1>
                     <?php

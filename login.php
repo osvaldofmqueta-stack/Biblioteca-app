@@ -210,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <!-- Painel esquerdo -->
     <div class="login-brand d-none d-md-flex">
-        <img src="/images/ispcan.png" alt="Brasão ISPCAN"
+        <img src="<?= BASE_URL ?>/images/ispcan.png" alt="Brasão ISPCAN"
              style="width:120px;height:120px;object-fit:contain;border-radius:50%;
                     box-shadow:0 4px 24px rgba(0,0,0,0.35);margin-bottom:1.75rem;">
         <h1>Sistema de<br>Biblioteca</h1>
