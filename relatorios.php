@@ -1,8 +1,9 @@
 <?php
-require 'auth.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/auth.php';
 redirectIfNotAdmin();
-require 'db.php';
-require 'functions.php';
+require_once __DIR__ . '/functions.php';
 
 $livros_mais_emprestados = $pdo->query('
     SELECT l.titulo, COUNT(e.id) as total

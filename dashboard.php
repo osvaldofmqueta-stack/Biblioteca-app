@@ -1,15 +1,16 @@
 <?php
-require 'auth.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/auth.php';
 redirectIfNotLoggedIn();
-require 'db.php';
-require 'functions.php';
-require 'header.php';
+require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/header.php';
 
 // Estatísticas
-$totalLivros      = $pdo->query("SELECT COUNT(*) FROM livros WHERE ativo = 1")->fetchColumn();
-$totalUsuarios    = $pdo->query("SELECT COUNT(*) FROM usuarios")->fetchColumn();
-$totalEmprestimos = $pdo->query("SELECT COUNT(*) FROM emprestimos")->fetchColumn();
-$emprestimosAtivos= $pdo->query("SELECT COUNT(*) FROM emprestimos WHERE data_devolucao IS NULL")->fetchColumn();
+$totalLivros      = (int) $pdo->query('SELECT COUNT(*) FROM livros WHERE ativo = 1')->fetchColumn();
+$totalUsuarios    = (int) $pdo->query('SELECT COUNT(*) FROM usuarios')->fetchColumn();
+$totalEmprestimos = (int) $pdo->query('SELECT COUNT(*) FROM emprestimos')->fetchColumn();
+$emprestimosAtivos= (int) $pdo->query('SELECT COUNT(*) FROM emprestimos WHERE data_devolucao IS NULL')->fetchColumn();
 
 $notificacoes = getNotificacoes();
 $nAtrasos     = count($notificacoes);

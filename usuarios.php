@@ -1,28 +1,32 @@
 <?php
-require 'auth.php';
-require 'functions.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/functions.php';
 redirectIfNotAdmin();
-require 'db.php';
 
 $mensagem = ''; $tipoMsg = 'info';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_usuario'])) {
-    $nome        = htmlspecialchars(trim($_POST['nome']));
-    $email       = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
-    $senha       = password_hash($_POST['senha'], PASSWORD_DEFAULT);
-    $nivel_acesso = htmlspecialchars($_POST['nivel_acesso']);
+    $nome         = sanitizeInput($_POST['nome'] ?? '');
+    $emailRaw     = trim($_POST['email'] ?? '');
+    $email        = validateEmail($emailRaw) ?: '';
+    $senhaRaw     = $_POST['senha'] ?? '';
+    $nivel_acesso = sanitizeInput($_POST['nivel_acesso'] ?? '');
 
-    if ($nome && $email && $_POST['senha'] && $nivel_acesso) {
+    if ($nome && $email && $senhaRaw && in_array($nivel_acesso, ['usuario', 'bibliotecario', 'admin'], strict: true)) {
         $check = $pdo->prepare('SELECT id FROM usuarios WHERE email = ?');
         $check->execute([$email]);
         if ($check->fetch()) {
             $mensagem = 'Este e-mail já está registado.'; $tipoMsg = 'danger';
         } else {
-            $pdo->prepare('INSERT INTO usuarios (nome, email, senha, nivel_acesso) VALUES (?, ?, ?, ?)')->execute([$nome, $email, $senha, $nivel_acesso]);
+            $senha = hashSenha($senhaRaw);
+            $pdo->prepare('INSERT INTO usuarios (nome, email, senha, nivel_acesso) VALUES (?, ?, ?, ?)')
+                ->execute([$nome, $email, $senha, $nivel_acesso]);
             $mensagem = 'Utilizador criado com sucesso!'; $tipoMsg = 'success';
         }
     } else {
-        $mensagem = 'Preencha todos os campos.'; $tipoMsg = 'warning';
+        $mensagem = 'Preencha todos os campos correctamente.'; $tipoMsg = 'warning';
     }
 }
 
@@ -121,16 +125,8 @@ require 'header.php';
                         <td>
                             <?php
                             $nivel = $u['nivel_acesso'];
-                            $cls = match($nivel) {
-                                'admin'        => 'badge-admin',
-                                'bibliotecario'=> 'badge-biblio',
-                                default        => 'badge-usuario'
-                            };
-                            $label = match($nivel) {
-                                'admin'        => 'Administrador',
-                                'bibliotecario'=> 'Bibliotecário',
-                                default        => 'Utilizador'
-                            };
+                            $cls   = nivelCssClass($nivel);
+                            $label = nivelLabel($nivel);
                             ?>
                             <span class="badge-status <?php echo $cls; ?>"><?php echo $label; ?></span>
                         </td>

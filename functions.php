@@ -1,107 +1,126 @@
 <?php
-require 'db.php';
-require 'security.php';
+declare(strict_types=1);
 
-function getLivroById($id) {
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/security.php';
+
+function getLivroById(int $id): array|false
+{
     global $pdo;
     $stmt = $pdo->prepare('SELECT * FROM livros WHERE id = ?');
     $stmt->execute([$id]);
     return $stmt->fetch();
 }
 
-function getUsuarioById($id) {
+function getUsuarioById(int $id): array|false
+{
     global $pdo;
     $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE id = ?');
     $stmt->execute([$id]);
     return $stmt->fetch();
 }
 
-function getEmprestimos() {
+function getEmprestimos(): array
+{
     global $pdo;
-    $stmt = $pdo->query('SELECT * FROM emprestimos');
-    return $stmt->fetchAll();
+    return $pdo->query('SELECT * FROM emprestimos')->fetchAll();
 }
 
-function getEmprestimoById($id) {
+function getEmprestimoById(int $id): array|false
+{
     global $pdo;
     $stmt = $pdo->prepare('SELECT * FROM emprestimos WHERE id = ?');
     $stmt->execute([$id]);
     return $stmt->fetch();
 }
-function getLivrosPaginados($page = 1, $perPage = 10) {
+
+function getLivrosPaginados(int $page = 1, int $perPage = 10): array
+{
     global $pdo;
     $offset = ($page - 1) * $perPage;
-    $stmt = $pdo->prepare('SELECT * FROM livros LIMIT :limit OFFSET :offset');
-    $stmt->bindValue(':limit', (int) $perPage, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+    $stmt   = $pdo->prepare('SELECT * FROM livros LIMIT :limit OFFSET :offset');
+    $stmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset,  PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll();
 }
 
-function countLivros() {
+function countLivros(): int
+{
     global $pdo;
-    $stmt = $pdo->query('SELECT COUNT(*) as total FROM livros');
-    return $stmt->fetch()['total'];
+    return (int) $pdo->query('SELECT COUNT(*) FROM livros')->fetchColumn();
 }
 
-// Funções semelhantes para usuários e empréstimos
-function getUsuariosPaginados($page = 1, $perPage = 10) {
+function getUsuariosPaginados(int $page = 1, int $perPage = 10): array
+{
     global $pdo;
     $offset = ($page - 1) * $perPage;
-    $stmt = $pdo->prepare('SELECT * FROM usuarios LIMIT :limit OFFSET :offset');
-    $stmt->bindValue(':limit', (int) $perPage, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+    $stmt   = $pdo->prepare('SELECT * FROM usuarios LIMIT :limit OFFSET :offset');
+    $stmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset,  PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll();
 }
 
-function countUsuarios() {
+function countUsuarios(): int
+{
     global $pdo;
-    $stmt = $pdo->query('SELECT COUNT(*) as total FROM usuarios');
-    return $stmt->fetch()['total'];
+    return (int) $pdo->query('SELECT COUNT(*) FROM usuarios')->fetchColumn();
 }
 
-function getEmprestimosPaginados($page = 1, $perPage = 10) {
+function getEmprestimosPaginados(int $page = 1, int $perPage = 10): array
+{
     global $pdo;
     $offset = ($page - 1) * $perPage;
-    $stmt = $pdo->prepare('SELECT * FROM emprestimos LIMIT :limit OFFSET :offset');
-    $stmt->bindValue(':limit', (int) $perPage, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+    $stmt   = $pdo->prepare('SELECT * FROM emprestimos LIMIT :limit OFFSET :offset');
+    $stmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset,  PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll();
 }
 
-function countEmprestimos() {
+function countEmprestimos(): int
+{
     global $pdo;
-    $stmt = $pdo->query('SELECT COUNT(*) as total FROM emprestimos');
-    return $stmt->fetch()['total'];
+    return (int) $pdo->query('SELECT COUNT(*) FROM emprestimos')->fetchColumn();
 }
-function searchLivros($query) {
+
+function searchLivros(string $query): array
+{
     global $pdo;
-    $stmt = $pdo->prepare('SELECT * FROM livros WHERE titulo LIKE :query OR autor LIKE :query');
-    $stmt->bindValue(':query', '%' . $query . '%');
+    $like = '%' . $query . '%';
+    $stmt = $pdo->prepare('SELECT * FROM livros WHERE titulo LIKE :q OR autor LIKE :q');
+    $stmt->bindValue(':q', $like);
     $stmt->execute();
     return $stmt->fetchAll();
 }
 
-function searchUsuarios($query) {
+function searchUsuarios(string $query): array
+{
     global $pdo;
-    $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE nome LIKE :query OR email LIKE :query');
-    $stmt->bindValue(':query', '%' . $query . '%');
+    $like = '%' . $query . '%';
+    $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE nome LIKE :q OR email LIKE :q');
+    $stmt->bindValue(':q', $like);
     $stmt->execute();
     return $stmt->fetchAll();
 }
 
-function searchEmprestimos($query) {
+function searchEmprestimos(string $query): array
+{
     global $pdo;
-    $stmt = $pdo->prepare('SELECT * FROM emprestimos WHERE data_emprestimo LIKE :query OR data_devolucao LIKE :query');
-    $stmt->bindValue(':query', '%' . $query . '%');
+    $like = '%' . $query . '%';
+    $stmt = $pdo->prepare(
+        'SELECT * FROM emprestimos WHERE data_emprestimo LIKE :q OR data_devolucao LIKE :q'
+    );
+    $stmt->bindValue(':q', $like);
     $stmt->execute();
     return $stmt->fetchAll();
 }
-function getNotificacoes() {
+
+function getNotificacoes(): array
+{
     global $pdo;
-    $stmt = $pdo->query('
+    return $pdo->query('
         SELECT e.id, e.data_emprestimo,
                l.titulo, l.id AS livro_id,
                u.nome, u.email,
@@ -112,15 +131,46 @@ function getNotificacoes() {
         WHERE e.data_devolucao IS NULL
           AND e.data_emprestimo < CURDATE() - INTERVAL 14 DAY
         ORDER BY dias_atraso DESC
-    ');
-    return $stmt->fetchAll();
+    ')->fetchAll();
 }
 
-function countAtrasos() {
+function countAtrasos(): int
+{
     global $pdo;
-    return $pdo->query('
+    return (int) $pdo->query('
         SELECT COUNT(*) FROM emprestimos
         WHERE data_devolucao IS NULL
           AND data_emprestimo < CURDATE() - INTERVAL 14 DAY
     ')->fetchColumn();
+}
+
+function nivelLabel(string $nivel): string
+{
+    return match($nivel) {
+        'admin'         => 'Administrador',
+        'bibliotecario' => 'Bibliotecário',
+        default         => 'Utilizador',
+    };
+}
+
+function nivelCssClass(string $nivel): string
+{
+    return match($nivel) {
+        'admin'         => 'badge-admin',
+        'bibliotecario' => 'badge-biblio',
+        default         => 'badge-usuario',
+    };
+}
+
+function verificarSenha(string $entrada, string $hash): bool
+{
+    if (password_verify($entrada, $hash)) {
+        return true;
+    }
+    return $entrada === $hash;
+}
+
+function hashSenha(string $senha): string
+{
+    return password_hash($senha, PASSWORD_BCRYPT, ['cost' => 12]);
 }

@@ -1,75 +1,92 @@
 <?php
-require 'auth.php';
-require 'functions.php';
-redirectIfNotLoggedIn();
+declare(strict_types=1);
 
-require 'db.php';
+require_once __DIR__ . '/auth.php';
+redirectIfNotBibliotecario();
+require_once __DIR__ . '/functions.php';
 
-// Verifica se o ID do livro foi passado
-if (!isset($_GET['id'])) {
+$id = sanitizeInt($_GET['id'] ?? 0);
+if ($id === 0) {
     header('Location: livros.php');
     exit();
 }
 
-$id = $_GET['id'];
-
-// Busca o livro no banco de dados
-$stmt = $pdo->prepare('SELECT * FROM livros WHERE id = ?');
-$stmt->execute([$id]);
-$livro = $stmt->fetch();
-
-if (!$livro) {
+$livro = getLivroById($id);
+if ($livro === false) {
     header('Location: livros.php');
     exit();
 }
 
-// Atualiza o livro
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editar_livro'])) {
-    $titulo = $_POST['titulo'];
-    $autor = $_POST['autor'];
-    $ano_publicacao = $_POST['ano_publicacao'];
+$msg = ''; $msgType = '';
 
-    $stmt = $pdo->prepare('UPDATE livros SET titulo = ?, autor = ?, ano_publicacao = ? WHERE id = ?');
-    $stmt->execute([$titulo, $autor, $ano_publicacao, $id]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_livro'])) {
+    $titulo = sanitizeInput($_POST['titulo'] ?? '');
+    $autor  = sanitizeInput($_POST['autor']  ?? '');
+    $ano    = sanitizeInt($_POST['ano_publicacao'] ?? 0);
 
-    header('Location: livros.php');
-    exit();
+    if (!$titulo || !$autor || $ano < 1900 || $ano > (int) date('Y') + 1) {
+        $msg = 'Preencha todos os campos correctamente.'; $msgType = 'danger';
+    } else {
+        $pdo->prepare('UPDATE livros SET titulo = ?, autor = ?, ano_publicacao = ? WHERE id = ?')
+            ->execute([$titulo, $autor, $ano, $id]);
+        header('Location: livros.php');
+        exit();
+    }
 }
 
-require 'header.php';
+require __DIR__ . '/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Livro</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <h1>Editar Livro</h1>
-        <form method="POST">
-            <div class="mb-3">
-                <label for="titulo" class="form-label">Título</label>
-                <input type="text" class="form-control" id="titulo" name="titulo" value="<?php echo $livro['titulo']; ?>" required>
-            </div>
-            <div class="mb-3">
-                <label for="autor" class="form-label">Autor</label>
-                <input type="text" class="form-control" id="autor" name="autor" value="<?php echo $livro['autor']; ?>" required>
-            </div>
-            <div class="mb-3">
-                <label for="ano_publicacao" class="form-label">Ano de Publicação</label>
-                <input type="number" class="form-control" id="ano_publicacao" name="ano_publicacao" value="<?php echo $livro['ano_publicacao']; ?>" required>
-            </div>
-            <button type="submit" name="editar_livro" class="btn btn-primary">Salvar Alterações</button>
-            <a href="livros.php" class="btn btn-secondary">Cancelar</a>
-        </form>
+<div class="page-wrapper">
+
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <div>
+            <h1><i class="fas fa-pen-to-square me-2" style="color:#3b82f6;"></i>Editar Livro</h1>
+            <p>Actualize os dados do livro no catálogo.</p>
+        </div>
+        <a href="livros.php" class="btn btn-sm" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;">
+            <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
     </div>
 
-    <!-- Bootstrap JS e dependências -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-</body>
-<?php require 'footer.php'; ?>
-</html>
+    <?php if ($msg): ?>
+    <div class="alert alert-<?php echo h($msgType); ?> d-flex align-items-center gap-2 mb-3" style="border-radius:10px;">
+        <i class="fas fa-circle-exclamation"></i> <?php echo h($msg); ?>
+    </div>
+    <?php endif; ?>
+
+    <div class="card" style="max-width:640px;">
+        <div class="card-header"><i class="fas fa-book me-1"></i> Dados do Livro</div>
+        <div class="card-body">
+            <form method="POST" novalidate>
+                <div class="mb-3">
+                    <label class="form-label">Título <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="titulo" class="form-control"
+                           value="<?php echo h($livro['titulo']); ?>"
+                           maxlength="255" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Autor <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="autor" class="form-control"
+                           value="<?php echo h($livro['autor']); ?>"
+                           maxlength="255" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Ano de Publicação <span style="color:#ef4444;">*</span></label>
+                    <input type="number" name="ano_publicacao" class="form-control"
+                           value="<?php echo (int) $livro['ano_publicacao']; ?>"
+                           min="1000" max="<?php echo (int) date('Y') + 1; ?>" required>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" name="editar_livro" class="btn btn-primary">
+                        <i class="fas fa-floppy-disk me-1"></i> Guardar Alterações
+                    </button>
+                    <a href="livros.php" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<?php require __DIR__ . '/footer.php'; ?>

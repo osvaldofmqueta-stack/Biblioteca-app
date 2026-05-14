@@ -1,7 +1,11 @@
 <?php
-session_start();
-require 'db.php';
-require 'functions.php';
+declare(strict_types=1);
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/functions.php';
 
 if (isset($_SESSION['user_id'])) {
     header('Location: dashboard.php');
@@ -10,21 +14,22 @@ if (isset($_SESSION['user_id'])) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'] ?? '';
+    $email = trim($_POST['email'] ?? '');
     $senha = $_POST['senha'] ?? '';
 
     $stmt = $pdo->prepare('SELECT * FROM usuarios WHERE email = ?');
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
-    if ($user && $senha === $user['senha']) {
+    if ($user !== false && verificarSenha($senha, $user['senha'])) {
+        session_regenerate_id(true);
         $_SESSION['user_id']      = $user['id'];
         $_SESSION['nivel_acesso'] = $user['nivel_acesso'];
         $_SESSION['nome']         = $user['nome'];
         header('Location: dashboard.php');
         exit();
     } else {
-        $error = "E-mail ou senha incorretos.";
+        $error = 'E-mail ou senha incorrectos.';
     }
 }
 ?>

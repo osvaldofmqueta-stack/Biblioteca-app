@@ -1,13 +1,14 @@
 <?php
-require 'auth.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/auth.php';
 redirectIfNotLoggedIn();
-require 'db.php';
-require 'functions.php';
+require_once __DIR__ . '/functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_livro']) && isBibliotecario()) {
-    $titulo = trim($_POST['titulo']);
-    $autor  = trim($_POST['autor']);
-    $ano    = intval($_POST['ano_publicacao']);
+    $titulo = sanitizeInput($_POST['titulo'] ?? '');
+    $autor  = sanitizeInput($_POST['autor']  ?? '');
+    $ano    = sanitizeInt($_POST['ano_publicacao'] ?? 0);
     if ($titulo && $autor && $ano > 0) {
         $pdo->prepare('INSERT INTO livros (titulo, autor, ano_publicacao) VALUES (?, ?, ?)')->execute([$titulo, $autor, $ano]);
         header('Location: livros.php'); exit();

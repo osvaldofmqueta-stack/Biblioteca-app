@@ -1,20 +1,25 @@
 <?php
-require 'auth.php';
-redirectIfNotLoggedIn();
-require 'db.php';
-require 'functions.php';
+declare(strict_types=1);
 
-$userId = $_SESSION['user_id'];
-$user   = $pdo->prepare('SELECT * FROM usuarios WHERE id = ?');
-$user->execute([$userId]);
-$user = $user->fetch();
+require_once __DIR__ . '/auth.php';
+redirectIfNotLoggedIn();
+require_once __DIR__ . '/functions.php';
+
+$userId = (int) $_SESSION['user_id'];
+$user   = getUsuarioById($userId);
+if ($user === false) {
+    session_destroy();
+    header('Location: login.php');
+    exit();
+}
 
 $msg = ''; $msgType = '';
 
 // Actualizar nome / email
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_info'])) {
-    $nome  = htmlspecialchars(trim($_POST['nome']));
-    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
+    $nome     = sanitizeInput($_POST['nome'] ?? '');
+    $emailRaw = trim($_POST['email'] ?? '');
+    $email    = validateEmail($emailRaw) ?: '';
 
     if (!$nome || !$email) {
         $msg = 'Nome e e-mail são obrigatórios.'; $msgType = 'danger';
@@ -39,16 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_senha'])) {
     $nova   = $_POST['senha_nova']   ?? '';
     $conf   = $_POST['senha_conf']   ?? '';
 
-    $senhaCorrecta = password_verify($atual, $user['senha']) || ($atual === $user['senha']);
-
-    if (!$senhaCorrecta) {
+    if (!verificarSenha($atual, $user['senha'])) {
         $msg = 'Senha actual incorrecta.'; $msgType = 'danger';
     } elseif (strlen($nova) < 6) {
         $msg = 'A nova senha deve ter pelo menos 6 caracteres.'; $msgType = 'danger';
     } elseif ($nova !== $conf) {
         $msg = 'A confirmação não coincide com a nova senha.'; $msgType = 'danger';
     } else {
-        $hash = password_hash($nova, PASSWORD_DEFAULT);
+        $hash = hashSenha($nova);
         $pdo->prepare('UPDATE usuarios SET senha = ? WHERE id = ?')->execute([$hash, $userId]);
         $user['senha'] = $hash;
         $msg = 'Senha alterada com sucesso!'; $msgType = 'success';
@@ -63,16 +66,8 @@ $empAtivos = $pdo->prepare('SELECT COUNT(*) FROM emprestimos WHERE usuario_id = 
 $empAtivos->execute([$userId]);
 $empAtivos = $empAtivos->fetchColumn();
 
-$nivelLabel = match($user['nivel_acesso']) {
-    'admin'         => 'Administrador',
-    'bibliotecario' => 'Bibliotecário',
-    default         => 'Utilizador'
-};
-$nivelCls = match($user['nivel_acesso']) {
-    'admin'         => 'badge-admin',
-    'bibliotecario' => 'badge-biblio',
-    default         => 'badge-usuario'
-};
+$nivelLabel = nivelLabel($user['nivel_acesso']);
+$nivelCls   = nivelCssClass($user['nivel_acesso']);
 $letra = mb_strtoupper(mb_substr(trim($user['nome']), 0, 1, 'UTF-8'), 'UTF-8');
 
 require 'header.php';

@@ -1,30 +1,35 @@
 <?php
-/**
- * Sanitiza a entrada do usuário para evitar XSS e SQL Injection
- */
-function sanitizeInput($data) {
-    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES, 'UTF-8');
+declare(strict_types=1);
+
+function sanitizeInput(string $data): string
+{
+    return htmlspecialchars(strip_tags(trim($data)), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
-/**
- * Escapa caracteres especiais para prevenir XSS (opcional, já incluído no sanitizeInput)
- */
-function preventXSS($data) {
-    return htmlentities($data, ENT_QUOTES, 'UTF-8');
+function preventXSS(string $data): string
+{
+    return htmlentities($data, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
-/**
- * Valida se um dado é numérico antes de ser usado em queries SQL
- */
-function sanitizeInt($data) {
-    return filter_var($data, FILTER_VALIDATE_INT) ? (int) $data : 0;
+function sanitizeInt(mixed $data): int
+{
+    $val = filter_var($data, FILTER_VALIDATE_INT);
+    return $val !== false ? (int) $val : 0;
 }
 
-/**
- * Usa prepared statements para evitar SQL Injection (exemplo de uso)
- */
-function executeSecureQuery($pdo, $query, $params) {
+function executeSecureQuery(PDO $pdo, string $query, array $params = []): PDOStatement
+{
     $stmt = $pdo->prepare($query);
     $stmt->execute($params);
     return $stmt;
+}
+
+function validateEmail(string $email): string|false
+{
+    return filter_var(trim($email), FILTER_VALIDATE_EMAIL);
+}
+
+function h(string $str): string
+{
+    return htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }

@@ -1,10 +1,10 @@
 <?php
-require 'auth.php';
-redirectIfNotAdmin();
+declare(strict_types=1);
 
-require 'db.php';
-require 'functions.php';
-require 'vendor/autoload.php';
+require_once __DIR__ . '/auth.php';
+redirectIfNotAdmin();
+require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;

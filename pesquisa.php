@@ -1,8 +1,9 @@
 <?php
-require 'auth.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/auth.php';
 redirectIfNotLoggedIn();
-require 'db.php';
-require 'functions.php';
+require_once __DIR__ . '/functions.php';
 
 // Paleta de cores
 $paleta = [
@@ -12,11 +13,13 @@ $paleta = [
 ];
 
 // Filtros
-$titulo     = trim($_GET['titulo']    ?? '');
-$autor      = trim($_GET['autor']     ?? '');
-$ano_min    = intval($_GET['ano_min'] ?? 0);
-$ano_max    = intval($_GET['ano_max'] ?? 0);
-$estado     = $_GET['estado']         ?? '';
+$titulo  = sanitizeInput($_GET['titulo'] ?? '');
+$autor   = sanitizeInput($_GET['autor']  ?? '');
+$ano_min = sanitizeInt($_GET['ano_min']  ?? 0);
+$ano_max = sanitizeInt($_GET['ano_max']  ?? 0);
+$estado  = in_array($_GET['estado'] ?? '', ['', 'disponivel', 'indisponivel'], strict: true)
+           ? ($_GET['estado'] ?? '')
+           : '';
 
 // Query dinâmica
 $where  = ['1=1'];
