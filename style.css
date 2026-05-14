@@ -814,3 +814,236 @@ body.dark-mode .form-control,
 body.dark-mode .form-select { background: #1e1e30; border-color: #3d3d5c; color: #e5e7eb; }
 body.dark-mode .input-group-text { background: #252538; border-color: #3d3d5c; color: #9ca3af; }
 body.dark-mode .site-footer { background: #1e1e30; border-color: #2d2d45; }
+
+/* ============================================================
+   RESPONSIVIDADE COMPLETA — todos os dispositivos
+   ============================================================ */
+
+/* ── Utilitários base ── */
+img { max-width: 100%; height: auto; }
+
+/* ── Tabelas: scroll horizontal em ecrãs pequenos ── */
+.table-responsive-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.card-body > .table,
+.card > .table {
+    min-width: 480px;
+}
+
+/* ============================================================
+   TABLET — max 992px
+   ============================================================ */
+@media (max-width: 992px) {
+    .page-wrapper { padding: 1.5rem 1rem; }
+
+    /* Navbar */
+    .navbar { height: auto; min-height: 56px; padding: 0 1rem; }
+    .navbar-collapse { padding: 0.5rem 0 1rem; border-top: 1px solid rgba(255,255,255,0.08); margin-top: 4px; }
+    .navbar-nav.me-auto { gap: 0 !important; }
+    .nav-link { padding: 0.5rem 0.75rem !important; border-radius: 7px; }
+    .nav-user-btn { margin-top: 6px; width: 100%; justify-content: flex-start !important; }
+    .nav-dropdown { width: 100% !important; min-width: unset !important; }
+    .toggle-btn { margin-top: 6px; }
+
+    /* Stat cards */
+    .stat-card { padding: 1.1rem; gap: 0.9rem; }
+    .stat-icon { width: 44px; height: 44px; font-size: 1.2rem; }
+    .stat-info h3 { font-size: 1.5rem; }
+
+    /* Action cards */
+    .action-card { padding: 1.1rem 1.2rem; }
+
+    /* Bookshelf */
+    .book-card { width: 95px; }
+    .book-cover { width: 68px; height: 100px; }
+    .book-cover .book-letter { font-size: 1.5rem; }
+    .shelf-plank { gap: 0.75rem; padding: 0.5rem 1rem 0.9rem; min-height: 150px; }
+
+    /* Dashboard brasão */
+    .dashboard-brasao { width: 58px; height: 58px; }
+
+    /* Overdue items */
+    .overdue-info { flex-direction: column; align-items: flex-start !important; gap: 2px !important; }
+    .overdue-since { margin-left: 0 !important; }
+}
+
+/* ============================================================
+   TELEMÓVEL GRANDE — max 768px
+   ============================================================ */
+@media (max-width: 768px) {
+    .page-wrapper { padding: 1.25rem 0.85rem; }
+
+    /* Page header */
+    .page-header { margin-bottom: 1.25rem; }
+    .page-header h1 { font-size: 1.3rem; }
+    .page-header.d-flex { flex-direction: column !important; align-items: flex-start !important; gap: 0.75rem !important; }
+
+    /* Brasão no dashboard */
+    .dashboard-brasao { width: 52px; height: 52px; }
+
+    /* Section title */
+    .section-title { margin-top: 1.5rem; }
+
+    /* Stat cards: 2 colunas */
+    .stat-card { padding: 1rem; gap: 0.75rem; }
+    .stat-icon { width: 40px; height: 40px; font-size: 1.1rem; flex-shrink: 0; }
+    .stat-info h3 { font-size: 1.4rem; }
+    .stat-info span { font-size: 0.75rem; }
+    .stat-alert-badge { font-size: 0.62rem; }
+
+    /* Action cards */
+    .action-card { padding: 0.9rem 1rem; }
+    .action-card .ac-icon { width: 38px; height: 38px; font-size: 1.05rem; }
+    .action-card .ac-label { font-size: 0.88rem; }
+    .action-card .ac-desc { font-size: 0.75rem; }
+
+    /* Cards */
+    .card-header { padding: 0.7rem 1rem; font-size: 0.88rem; }
+    .card-body { padding: 1rem; }
+
+    /* Tables */
+    .table { font-size: 0.82rem; }
+    .table thead th { padding: 0.6rem 0.75rem; font-size: 0.7rem; }
+    .table tbody td { padding: 0.6rem 0.75rem; }
+
+    /* Bookshelf */
+    .shelf-plank { gap: 0.6rem; padding: 0.4rem 0.75rem 0.75rem; min-height: 130px; }
+    .book-card { width: 82px; }
+    .book-cover { width: 60px; height: 88px; }
+    .book-cover .book-letter { font-size: 1.35rem; }
+    .book-cover .book-mini-title { font-size: 0.48rem; max-width: 52px; }
+    .book-footer .bk-title { font-size: 0.65rem; max-width: 82px; }
+    .book-footer .bk-author { font-size: 0.58rem; max-width: 82px; }
+    .shelf-label { font-size: 0.72rem; flex-wrap: wrap; gap: 4px; }
+
+    /* Modal */
+    .modal-dialog { margin: 0.5rem; max-width: calc(100% - 1rem) !important; }
+    .book-modal-cover { height: 140px; }
+    .book-modal-big { width: 72px; height: 105px; }
+    .book-modal-big .big-letter { font-size: 2rem; }
+    .modal-header { padding: 0.85rem 1rem 0.4rem; }
+    .modal-body { padding: 0.75rem 1rem; }
+    .modal-footer { padding: 0.4rem 1rem 1rem; }
+    .book-detail-row { font-size: 0.83rem; }
+    .book-detail-row .lbl { width: 75px; font-size: 0.72rem; }
+
+    /* Overdue panel */
+    .overdue-panel-header { padding: 0.65rem 0.9rem; font-size: 0.82rem; }
+    .overdue-item { padding: 0.55rem 0.9rem; font-size: 0.8rem; }
+    .overdue-footer { padding: 0.55rem 0.9rem; }
+    .overdue-pill { font-size: 0.75rem; padding: 4px 10px; }
+
+    /* Forms */
+    .form-control, .form-select { font-size: 0.85rem; }
+    .form-label { font-size: 0.8rem; }
+
+    /* Botões */
+    .btn { font-size: 0.82rem; }
+    .btn-sm { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
+
+    /* Pagination */
+    .pagination { gap: 2px; }
+    .page-link { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+    /* Sugestões de pesquisa */
+    .sc-cover { width: 52px; height: 66px; }
+    .sc-title { font-size: 0.82rem; }
+    .sc-author { font-size: 0.73rem; }
+
+    /* Perfil */
+    .profile-avatar { width: 64px; height: 64px; font-size: 1.6rem; }
+
+    /* Toolbar de pesquisa */
+    .bookshelf-toolbar { flex-direction: column; align-items: stretch !important; }
+    .bookshelf-toolbar input { max-width: 100% !important; }
+
+    /* Footer */
+    .site-footer { padding: 1rem; font-size: 0.78rem; margin-top: 2rem; }
+}
+
+/* ============================================================
+   TELEMÓVEL PEQUENO — max 576px
+   ============================================================ */
+@media (max-width: 576px) {
+    .page-wrapper { padding: 1rem 0.65rem; }
+
+    /* Navbar brand */
+    .navbar-brand { font-size: 1rem; }
+    .brand-icon { width: 26px; height: 26px; font-size: 0.8rem; margin-right: 6px; }
+
+    /* Page header com brasão: empilhar verticalmente */
+    .page-header .d-flex { flex-direction: column !important; align-items: center !important; text-align: center; }
+    .dashboard-brasao { width: 64px; height: 64px; margin-bottom: 0.5rem; }
+
+    /* Stat cards: 1 coluna em ecrãs muito pequenos */
+    .stat-card { border-radius: 10px; }
+    .stat-info h3 { font-size: 1.35rem; }
+
+    /* Bookshelf: livros mais pequenos */
+    .book-card { width: 70px; }
+    .book-cover { width: 52px; height: 76px; }
+    .book-cover .book-letter { font-size: 1.2rem; margin-bottom: 3px; }
+    .book-cover .book-mini-title { font-size: 0.43rem; max-width: 44px; }
+    .book-footer { display: none; }
+    .shelf-plank { gap: 0.5rem; min-height: 110px; }
+
+    /* Modal ocupa ecrã inteiro */
+    .modal-dialog { margin: 0 !important; max-width: 100% !important; height: 100%; }
+    .modal-content { border-radius: 0 !important; height: 100%; }
+    .book-modal-cover { height: 160px; }
+
+    /* Cards sem padding extra */
+    .card { border-radius: 10px; }
+    .card-body { padding: 0.85rem; }
+
+    /* Tabelas */
+    .table { font-size: 0.78rem; }
+
+    /* Formulários: campos a 100% */
+    .row.g-3 > [class*="col-md"] { width: 100% !important; }
+
+    /* Overdue */
+    .overdue-days { font-size: 0.68rem; padding: 1px 7px; }
+
+    /* Botões de acção no modal */
+    .modal-footer { flex-direction: row; }
+    .modal-footer .btn { font-size: 0.78rem; padding: 0.35rem 0.5rem; }
+
+    /* Relatórios: tabela de resumo */
+    .results-bar { flex-direction: column; gap: 0.5rem; }
+}
+
+/* ============================================================
+   MODO PAISAGEM EM TELEMÓVEL — landscape phones
+   ============================================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+    .navbar { min-height: 48px; }
+    .page-wrapper { padding: 0.75rem; }
+    .book-modal-cover { height: 100px; }
+}
+
+/* ============================================================
+   FIXES GERAIS PARA TODOS OS ECRÃS
+   ============================================================ */
+
+/* Garantir que .row usa Bootstrap correctamente */
+.row { --bs-gutter-x: 1rem; }
+
+/* Garantir scroll horizontal em tabelas dentro de cards */
+.card .card-body { overflow-x: auto; }
+.card .card-body .table { min-width: 400px; }
+
+/* Espaçamento da navbar em mobile colapsada */
+@media (max-width: 992px) {
+    .navbar-nav.ms-auto,
+    .navbar-nav.ms-2 { margin-left: 0 !important; }
+    .navbar-collapse .nav-bell { display: inline-flex; align-items: center; padding: 0.5rem 0.75rem !important; }
+    .bell-badge { top: 4px; right: 4px; }
+}
+
+/* Esconder texto do utilizador na navbar em ecrãs médios */
+@media (max-width: 1100px) {
+    .user-name { display: none !important; }
+}

@@ -158,9 +158,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #9ca3af; font-size: 0.78rem; text-align: center;
         }
 
+        /* Tablet: painel esquerdo mais estreito */
+        @media (max-width: 960px) and (min-width: 769px) {
+            .login-brand { min-width: 260px; padding: 2rem 1.5rem; }
+            .login-brand img { width: 90px; height: 90px; }
+            .login-brand h1 { font-size: 1.5rem; }
+            .login-form-panel { padding: 2.5rem 2rem; }
+        }
+
+        /* Mobile: painel esquerdo some, formulário ocupa tudo */
         @media (max-width: 768px) {
-            .login-brand { display: none; }
-            .login-form-panel { width: 100%; box-shadow: none; padding: 2rem 1.5rem; }
+            body { background: #f0f2f5; min-height: 100vh; align-items: flex-start; padding: 0; }
+            .login-wrapper {
+                flex-direction: column;
+                min-height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                max-width: 100%;
+                width: 100%;
+            }
+            .login-brand { display: none !important; }
+            .login-form-panel {
+                width: 100%;
+                max-width: 480px;
+                margin: auto;
+                border-radius: 16px;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+                padding: 2rem 1.5rem 2.5rem;
+                min-height: unset;
+            }
+            .login-form-panel h2 { font-size: 1.4rem; }
+            .login-form-panel .subtitle { font-size: 0.83rem; }
+            body { padding: 1.5rem 1rem; align-items: center; }
+        }
+
+        /* Mobile pequeno */
+        @media (max-width: 420px) {
+            body { padding: 1rem 0.5rem; }
+            .login-form-panel { padding: 1.5rem 1.1rem 2rem; border-radius: 12px; }
+            .login-form-panel h2 { font-size: 1.25rem; }
+            .input-wrap input, .btn-login { font-size: 0.9rem; }
         }
     </style>
 </head>
