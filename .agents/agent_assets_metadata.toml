@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "SZkQ_nMJ2UVcFEjbW9HOL"
+uri = "file://exports/sbiblioteca_export.sql.gz"
+type = "unspecified"
+title = "sbiblioteca_export.sql.gz — Base de dados completa"
