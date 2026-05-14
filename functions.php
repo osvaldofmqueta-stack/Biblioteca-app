@@ -104,6 +104,3 @@ function getNotificacoes() {
     $stmt = $pdo->query('SELECT * FROM emprestimos WHERE data_devolucao IS NULL AND data_emprestimo < NOW() - INTERVAL 7 DAY');
     return $stmt->fetchAll();
 }
-
-
-?>

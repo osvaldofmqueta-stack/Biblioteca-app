@@ -28,5 +28,3 @@ function executeSecureQuery($pdo, $query, $params) {
     $stmt->execute($params);
     return $stmt;
 }
-?>
-
