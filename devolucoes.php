@@ -1,102 +1,111 @@
 <?php
 require 'auth.php';
 redirectIfNotBibliotecario();
-
 require 'db.php';
 require 'functions.php';
-require 'header.php';
 
-// Processar devolução
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['devolver_livro'])) {
-    $emprestimo_id = intval($_POST['emprestimo_id']);
+$mensagem = ''; $tipoMsg = 'info';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['devolver_livro'])) {
+    $emprestimo_id  = intval($_POST['emprestimo_id']);
     $data_devolucao = sanitizeInput($_POST['data_devolucao']);
 
-    if ($emprestimo_id > 0 && !empty($data_devolucao)) {
+    if ($emprestimo_id > 0 && $data_devolucao) {
         try {
             $pdo->beginTransaction();
-
-            // Atualizar a devolução do livro
-            $stmt = $pdo->prepare('UPDATE emprestimos SET data_devolucao = ? WHERE id = ?');
-            $stmt->execute([$data_devolucao, $emprestimo_id]);
-
-            // Marcar o livro como disponível novamente
-            $stmt = $pdo->prepare('UPDATE livros SET disponivel = TRUE WHERE id = (SELECT livro_id FROM emprestimos WHERE id = ?)');
-            $stmt->execute([$emprestimo_id]);
-
+            $pdo->prepare('UPDATE emprestimos SET data_devolucao = ? WHERE id = ?')->execute([$data_devolucao, $emprestimo_id]);
+            $pdo->prepare('UPDATE livros SET disponivel = TRUE WHERE id = (SELECT livro_id FROM emprestimos WHERE id = ?)')->execute([$emprestimo_id]);
             $pdo->commit();
-            $mensagem = "Livro devolvido com sucesso!";
+            $mensagem = 'Livro devolvido com sucesso!'; $tipoMsg = 'success';
         } catch (Exception $e) {
             $pdo->rollBack();
-            $mensagem = "Erro ao processar devolução: " . $e->getMessage();
+            $mensagem = 'Erro ao processar devolução: ' . $e->getMessage(); $tipoMsg = 'danger';
         }
     } else {
-        $mensagem = "Erro: Dados inválidos.";
+        $mensagem = 'Dados inválidos.'; $tipoMsg = 'danger';
     }
 }
 
-// Listar empréstimos ativos (não devolvidos)
-$stmt = $pdo->query('SELECT * FROM emprestimos WHERE data_devolucao IS NULL');
-$emprestimos = $stmt->fetchAll();
+$emprestimos = $pdo->query('SELECT e.*, l.titulo, u.nome FROM emprestimos e JOIN livros l ON e.livro_id = l.id JOIN usuarios u ON e.usuario_id = u.id WHERE e.data_devolucao IS NULL ORDER BY e.data_emprestimo ASC')->fetchAll();
+
+require 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Devoluções</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5">
-    <h1 class="text-center mb-4"><i class="fas fa-undo"></i> Devolução de Livros</h1>
+<div class="page-wrapper">
 
-    <?php if (isset($mensagem)): ?>
-        <div class="alert alert-info">
-            <?php echo htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8'); ?>
-        </div>
+    <div class="page-header">
+        <h1><i class="fas fa-rotate-left me-2" style="color:#f97316;"></i>Devoluções</h1>
+        <p>Registe a devolução de livros emprestados.</p>
+    </div>
+
+    <?php if ($mensagem): ?>
+    <div class="alert alert-<?php echo $tipoMsg; ?> d-flex align-items-center gap-2 mb-3" style="border-radius:10px;">
+        <i class="fas fa-<?php echo $tipoMsg === 'success' ? 'circle-check' : 'circle-exclamation'; ?>"></i>
+        <?php echo htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8'); ?>
+    </div>
     <?php endif; ?>
 
-    <!-- Formulário de Devolução -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="card-title mb-0"><i class="fas fa-book"></i> Registrar Devolução</h5>
-        </div>
+    <div class="card mb-3">
+        <div class="card-header"><i class="fas fa-clipboard-check me-1"></i> Registar Devolução</div>
         <div class="card-body">
             <?php if (count($emprestimos) > 0): ?>
-                <form method="POST">
-                    <div class="mb-3">
-                        <label for="emprestimo_id" class="form-label">Empréstimo:</label>
-                        <select id="emprestimo_id" name="emprestimo_id" class="form-select" required>
-                            <?php foreach ($emprestimos as $emprestimo): 
-                                $livro = getLivroById($emprestimo['livro_id']);
-                                $usuario = getUsuarioById($emprestimo['usuario_id']);
-                            ?>
-                                <option value="<?php echo $emprestimo['id']; ?>">
-                                    <?php echo htmlspecialchars($livro['titulo'], ENT_QUOTES, 'UTF-8') . ' - ' . htmlspecialchars($usuario['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                                </option>
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Empréstimo em Curso</label>
+                        <select name="emprestimo_id" class="form-select" required>
+                            <option value="">Seleccionar empréstimo…</option>
+                            <?php foreach ($emprestimos as $e): ?>
+                            <option value="<?php echo $e['id']; ?>">
+                                <?php echo htmlspecialchars($e['titulo'], ENT_QUOTES, 'UTF-8') . ' — ' . htmlspecialchars($e['nome'], ENT_QUOTES, 'UTF-8') . ' (desde ' . $e['data_emprestimo'] . ')'; ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="data_devolucao" class="form-label">Data de Devolução:</label>
-                        <input type="date" id="data_devolucao" name="data_devolucao" class="form-control" required>
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Devolução</label>
+                        <input type="date" name="data_devolucao" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
                     </div>
-
-                    <button type="submit" name="devolver_livro" class="btn btn-success w-100">
-                        <i class="fas fa-check-circle"></i> Confirmar Devolução
-                    </button>
-                </form>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" name="devolver_livro" class="btn btn-primary w-100">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                    </div>
+                </div>
+            </form>
             <?php else: ?>
-                <div class="alert alert-warning">Nenhum livro emprestado no momento.</div>
+            <div class="notif-empty">
+                <i class="fas fa-circle-check"></i> Nenhum livro em falta de devolução.
+            </div>
             <?php endif; ?>
         </div>
     </div>
+
+    <?php if (count($emprestimos) > 0): ?>
+    <div class="card">
+        <div class="card-header light">
+            <i class="fas fa-clock me-1"></i> Livros Actualmente Emprestados
+            <span class="badge ms-2" style="background:#fff7ed;color:#f97316;border-radius:20px;padding:3px 10px;font-size:0.75rem;"><?php echo count($emprestimos); ?> em curso</span>
+        </div>
+        <div class="card-body" style="padding:0;">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr><th>Livro</th><th>Utilizador</th><th>Data Empréstimo</th></tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($emprestimos as $e): ?>
+                    <tr>
+                        <td><strong><?php echo htmlspecialchars($e['titulo'], ENT_QUOTES, 'UTF-8'); ?></strong></td>
+                        <td><?php echo htmlspecialchars($e['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($e['data_emprestimo'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 <?php require 'footer.php'; ?>
-</html>

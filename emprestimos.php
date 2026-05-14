@@ -1,131 +1,133 @@
 <?php
 require 'auth.php';
 redirectIfNotBibliotecario();
-
 require 'db.php';
 require 'functions.php';
-require 'header.php';
 
-// Adicionar empréstimo
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['adicionar_emprestimo'])) {
-    $livro_id = intval($_POST['livro_id']);
-    $usuario_id = intval($_POST['usuario_id']);
+$mensagem = '';
+$tipoMsg  = 'info';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_emprestimo'])) {
+    $livro_id        = intval($_POST['livro_id']);
+    $usuario_id      = intval($_POST['usuario_id']);
     $data_emprestimo = sanitizeInput($_POST['data_emprestimo']);
 
-    // Certificar que os IDs existem
-    $stmt = $pdo->prepare('SELECT id FROM livros WHERE id = ? AND disponivel = TRUE');
-    $stmt->execute([$livro_id]);
-    $livroExiste = $stmt->fetch();
+    $livroExiste   = $pdo->prepare('SELECT id FROM livros WHERE id = ? AND disponivel = TRUE');
+    $livroExiste->execute([$livro_id]);
+    $usuarioExiste = $pdo->prepare('SELECT id FROM usuarios WHERE id = ?');
+    $usuarioExiste->execute([$usuario_id]);
 
-    $stmt = $pdo->prepare('SELECT id FROM usuarios WHERE id = ?');
-    $stmt->execute([$usuario_id]);
-    $usuarioExiste = $stmt->fetch();
-
-    if ($livroExiste && $usuarioExiste && !empty($data_emprestimo)) {
-        // Registrar empréstimo
-        $stmt = $pdo->prepare('INSERT INTO emprestimos (livro_id, usuario_id, data_emprestimo) VALUES (?, ?, ?)');
-        $stmt->execute([$livro_id, $usuario_id, $data_emprestimo]);
-
-        // Marcar livro como indisponível
-        $stmt = $pdo->prepare('UPDATE livros SET disponivel = FALSE WHERE id = ?');
-        $stmt->execute([$livro_id]);
+    if ($livroExiste->fetch() && $usuarioExiste->fetch() && $data_emprestimo) {
+        $pdo->prepare('INSERT INTO emprestimos (livro_id, usuario_id, data_emprestimo) VALUES (?, ?, ?)')->execute([$livro_id, $usuario_id, $data_emprestimo]);
+        $pdo->prepare('UPDATE livros SET disponivel = FALSE WHERE id = ?')->execute([$livro_id]);
+        $mensagem = 'Empréstimo registado com sucesso!'; $tipoMsg = 'success';
+    } else {
+        $mensagem = 'Erro: verifique se o livro está disponível e os dados estão correctos.'; $tipoMsg = 'danger';
     }
 }
 
-// Listar empréstimos
-$emprestimos = getEmprestimos();
+$emprestimos = $pdo->query('SELECT e.*, l.titulo, u.nome FROM emprestimos e JOIN livros l ON e.livro_id = l.id JOIN usuarios u ON e.usuario_id = u.id ORDER BY e.id DESC')->fetchAll();
+$livrosDisponiveis = $pdo->query('SELECT * FROM livros WHERE disponivel = TRUE AND ativo = 1')->fetchAll();
+$usuarios = $pdo->query('SELECT * FROM usuarios ORDER BY nome')->fetchAll();
+
+require 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Empréstimos</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<div class="container mt-5">
-    <h1 class="text-center mb-4"><i class="fas fa-hand-holding"></i> Empréstimos</h1>
+<div class="page-wrapper">
 
-    <!-- Formulário para adicionar empréstimo -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-header bg-primary text-white">
-            <h5 class="card-title mb-0"><i class="fas fa-plus-circle"></i> Adicionar Empréstimo</h5>
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <div>
+            <h1><i class="fas fa-hand-holding-heart me-2" style="color:#22c55e;"></i>Empréstimos</h1>
+            <p>Registe e consulte os empréstimos de livros.</p>
         </div>
-        <div class="card-body">
-            <form method="POST">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label for="livro_id" class="form-label">Livro:</label>
-                        <select id="livro_id" name="livro_id" class="form-control" required>
-                            <?php
-                            $stmt = $pdo->query('SELECT * FROM livros WHERE disponivel = TRUE');
-                            $livros = $stmt->fetchAll();
-                            foreach ($livros as $livro): ?>
-                                <option value="<?php echo $livro['id']; ?>">
-                                    <?php echo htmlspecialchars($livro['titulo'], ENT_QUOTES, 'UTF-8'); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#formAddEmp">
+            <i class="fas fa-plus"></i> Novo Empréstimo
+        </button>
+    </div>
 
-                    <div class="col-md-4">
-                        <label for="usuario_id" class="form-label">Usuário:</label>
-                        <select id="usuario_id" name="usuario_id" class="form-control" required>
-                            <?php
-                            $stmt = $pdo->query('SELECT * FROM usuarios');
-                            $usuarios = $stmt->fetchAll();
-                            foreach ($usuarios as $usuario): ?>
-                                <option value="<?php echo $usuario['id']; ?>">
-                                    <?php echo htmlspecialchars($usuario['nome'], ENT_QUOTES, 'UTF-8'); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
+    <?php if ($mensagem): ?>
+    <div class="alert alert-<?php echo $tipoMsg; ?> d-flex align-items-center gap-2 mb-3" style="border-radius:10px;">
+        <i class="fas fa-<?php echo $tipoMsg === 'success' ? 'circle-check' : 'circle-exclamation'; ?>"></i>
+        <?php echo htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8'); ?>
+    </div>
+    <?php endif; ?>
 
-                    <div class="col-md-2">
-                        <label for="data_emprestimo" class="form-label">Data de Empréstimo:</label>
-                        <input type="date" id="data_emprestimo" name="data_emprestimo" class="form-control" required>
+    <div class="collapse mb-3" id="formAddEmp">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-plus-circle me-1"></i> Registar Empréstimo</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Livro</label>
+                            <select name="livro_id" class="form-select" required>
+                                <option value="">Seleccionar livro…</option>
+                                <?php foreach ($livrosDisponiveis as $l): ?>
+                                <option value="<?php echo $l['id']; ?>"><?php echo htmlspecialchars($l['titulo'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Utilizador</label>
+                            <select name="usuario_id" class="form-select" required>
+                                <option value="">Seleccionar utilizador…</option>
+                                <?php foreach ($usuarios as $u): ?>
+                                <option value="<?php echo $u['id']; ?>"><?php echo htmlspecialchars($u['nome'], ENT_QUOTES, 'UTF-8'); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Data do Empréstimo</label>
+                            <input type="date" name="data_emprestimo" class="form-control" value="<?php echo date('Y-m-d'); ?>" required>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" name="adicionar_emprestimo" class="btn btn-primary w-100">
+                                <i class="fas fa-save"></i> Registar
+                            </button>
+                        </div>
                     </div>
-
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" name="adicionar_emprestimo" class="btn btn-success w-100">
-                            <i class="fas fa-save"></i> Registrar
-                        </button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Lista de Empréstimos -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="card-title mb-0"><i class="fas fa-list"></i> Empréstimos Registrados</h5>
+    <div class="card">
+        <div class="card-header light d-flex align-items-center justify-content-between">
+            <span><i class="fas fa-list me-1"></i> Histórico de Empréstimos</span>
+            <span class="badge" style="background:#f0fdf4;color:#22c55e;border-radius:20px;padding:4px 12px;font-size:0.78rem;"><?php echo count($emprestimos); ?> registos</span>
         </div>
-        <div class="card-body">
-            <ul class="list-group">
-                <?php foreach ($emprestimos as $emprestimo): 
-                    $livro = getLivroById($emprestimo['livro_id']);
-                    $usuario = getUsuarioById($emprestimo['usuario_id']);
-
-                    if ($livro && $usuario): ?>
-                        <li class="list-group-item">
-                            <strong><?php echo htmlspecialchars($livro['titulo'], ENT_QUOTES, 'UTF-8'); ?></strong>
-                            - <?php echo htmlspecialchars($usuario['nome'], ENT_QUOTES, 'UTF-8'); ?> 
-                            <span class="text-muted">(<?php echo $emprestimo['data_emprestimo']; ?>)</span>
-                        </li>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </ul>
+        <div class="card-body" style="padding:0;">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Livro</th>
+                        <th>Utilizador</th>
+                        <th>Data Empréstimo</th>
+                        <th>Data Devolução</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($emprestimos as $e): ?>
+                    <tr>
+                        <td><strong><?php echo htmlspecialchars($e['titulo'], ENT_QUOTES, 'UTF-8'); ?></strong></td>
+                        <td><?php echo htmlspecialchars($e['nome'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($e['data_emprestimo'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($e['data_devolucao'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td>
+                            <?php if ($e['data_devolucao']): ?>
+                                <span class="badge-status badge-disponivel"><i class="fas fa-check me-1"></i>Devolvido</span>
+                            <?php else: ?>
+                                <span class="badge-status badge-indisponivel"><i class="fas fa-clock me-1"></i>Em curso</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
+
 </div>
-<footer>
-<?php
-require 'footer.php'; 
-?>
-</footer>
-<!-- Bootstrap JS -->
-<script src="https://cdn.j
+
+<?php require 'footer.php'; ?>

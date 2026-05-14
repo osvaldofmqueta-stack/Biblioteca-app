@@ -1,157 +1,145 @@
 <?php
 require 'auth.php';
 redirectIfNotLoggedIn();
-
 require 'db.php';
 require 'functions.php';
 
-// Adicionar livro (apenas admin e bibliotecário)
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['adicionar_livro']) && isBibliotecario()) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_livro']) && isBibliotecario()) {
     $titulo = trim($_POST['titulo']);
-    $autor = trim($_POST['autor']);
-    $ano_publicacao = intval($_POST['ano_publicacao']);
-
-    if (!empty($titulo) && !empty($autor) && $ano_publicacao > 0) {
-        $stmt = $pdo->prepare('INSERT INTO livros (titulo, autor, ano_publicacao) VALUES (?, ?, ?)');
-        $stmt->execute([$titulo, $autor, $ano_publicacao]);
+    $autor  = trim($_POST['autor']);
+    $ano    = intval($_POST['ano_publicacao']);
+    if ($titulo && $autor && $ano > 0) {
+        $pdo->prepare('INSERT INTO livros (titulo, autor, ano_publicacao) VALUES (?, ?, ?)')->execute([$titulo, $autor, $ano]);
+        header('Location: livros.php'); exit();
     }
 }
 
-// Excluir livro (apenas admin e bibliotecário)
 if (isset($_GET['excluir']) && isBibliotecario()) {
     $id = intval($_GET['excluir']);
-
-    // Excluir empréstimos associados ao livro
-    $stmt = $pdo->prepare('DELETE FROM emprestimos WHERE livro_id = ?');
-    $stmt->execute([$id]);
-
-    // Agora excluir o livro
-    $stmt = $pdo->prepare('DELETE FROM livros WHERE id = ?');
-    $stmt->execute([$id]);
-
-    header('Location: livros.php'); // Recarrega a página após a exclusão
-    exit();
+    $pdo->prepare('DELETE FROM emprestimos WHERE livro_id = ?')->execute([$id]);
+    $pdo->prepare('DELETE FROM livros WHERE id = ?')->execute([$id]);
+    header('Location: livros.php'); exit();
 }
 
-// Paginação
 $livrosPorPagina = 10;
-$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+$page   = max(1, intval($_GET['page'] ?? 1));
 $offset = ($page - 1) * $livrosPorPagina;
+$total  = $pdo->query('SELECT COUNT(*) FROM livros')->fetchColumn();
+$totalPages = ceil($total / $livrosPorPagina);
 
-$totalLivrosStmt = $pdo->query('SELECT COUNT(*) FROM livros');
-$totalLivros = $totalLivrosStmt->fetchColumn();
-$totalPages = ceil($totalLivros / $livrosPorPagina);
-
-// Buscar livros com limite para paginação
-$stmt = $pdo->prepare('SELECT * FROM livros LIMIT :offset, :limit');
-$stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-$stmt->bindParam(':limit', $livrosPorPagina, PDO::PARAM_INT);
+$stmt = $pdo->prepare('SELECT * FROM livros ORDER BY id DESC LIMIT :offset, :limit');
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->bindValue(':limit',  $livrosPorPagina, PDO::PARAM_INT);
 $stmt->execute();
 $livros = $stmt->fetchAll();
 
 require 'header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Livros</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-    <div class="container mt-5">
-        <h1 class="text-center mb-4"><i class="fas fa-book"></i> Livros</h1>
+<div class="page-wrapper">
 
-        <!-- Formulário para adicionar livro (apenas admin e bibliotecário) -->
-        <?php if (isBibliotecario()): ?>
-            <div class="card shadow-sm mb-5">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="card-title mb-0"><i class="fas fa-plus-circle"></i> Adicionar Livro</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" name="titulo" placeholder="Título" required>
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" name="autor" placeholder="Autor" required>
-                            </div>
-                            <div class="col-md-2">
-                                <input type="number" class="form-control" name="ano_publicacao" placeholder="Ano" required>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="submit" name="adicionar_livro" class="btn btn-success w-100">
-                                    <i class="fas fa-save"></i> Salvar
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Lista de Livros -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0"><i class="fas fa-list"></i> Lista de Livros</h5>
-            </div>
-            <div class="card-body">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Título</th>
-                            <th>Autor</th>
-                            <th>Ano de Publicação</th>
-                            <?php if (isBibliotecario()): ?>
-                                <th>Ações</th>
-                            <?php endif; ?>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($livros as $livro): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($livro['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($livro['autor'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($livro['ano_publicacao'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <?php if (isBibliotecario()): ?>
-                                    <td>
-                                        <a href="editar_livro.php?id=<?php echo $livro['id']; ?>" class="btn btn-warning btn-sm">
-                                            <i class="fas fa-edit"></i> Editar
-                                        </a>
-                                        <a href="livros.php?excluir=<?php echo $livro['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja excluir este livro?');">
-                                            <i class="fas fa-trash"></i> Excluir
-                                        </a>
-                                    </td>
-                                <?php endif; ?>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+    <div class="page-header d-flex align-items-center justify-content-between">
+        <div>
+            <h1><i class="fas fa-book me-2" style="color:#3b82f6;"></i>Livros</h1>
+            <p>Consulte e gira o catálogo de livros da biblioteca.</p>
         </div>
-
-        <!-- Paginação -->
-        <nav aria-label="Page navigation" class="mt-4">
-            <ul class="pagination justify-content-center">
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?php echo $i == $page ? 'active' : ''; ?>">
-                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                    </li>
-                <?php endfor; ?>
-            </ul>
-        </nav>
+        <?php if (isBibliotecario()): ?>
+        <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#formAddLivro">
+            <i class="fas fa-plus"></i> Adicionar Livro
+        </button>
+        <?php endif; ?>
     </div>
 
-    <!-- Bootstrap JS e dependências -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-</body>
+    <?php if (isBibliotecario()): ?>
+    <div class="collapse mb-3" id="formAddLivro">
+        <div class="card">
+            <div class="card-header"><i class="fas fa-plus-circle me-1"></i> Novo Livro</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" name="titulo" placeholder="Título do livro" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Autor</label>
+                            <input type="text" class="form-control" name="autor" placeholder="Nome do autor" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Ano</label>
+                            <input type="number" class="form-control" name="ano_publicacao" placeholder="2024" required>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" name="adicionar_livro" class="btn btn-primary w-100">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <div class="card">
+        <div class="card-header light d-flex align-items-center justify-content-between">
+            <span><i class="fas fa-list me-1"></i> Lista de Livros</span>
+            <span class="badge" style="background:#eff6ff;color:#3b82f6;border-radius:20px;padding:4px 12px;font-size:0.78rem;"><?php echo $total; ?> livros</span>
+        </div>
+        <div class="card-body" style="padding:0;">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Ano</th>
+                        <th>Estado</th>
+                        <?php if (isBibliotecario()): ?><th>Acções</th><?php endif; ?>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($livros as $livro): ?>
+                    <tr>
+                        <td><strong><?php echo htmlspecialchars($livro['titulo'], ENT_QUOTES, 'UTF-8'); ?></strong></td>
+                        <td><?php echo htmlspecialchars($livro['autor'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($livro['ano_publicacao'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td>
+                            <?php if ($livro['disponivel']): ?>
+                                <span class="badge-status badge-disponivel"><i class="fas fa-circle-check me-1"></i>Disponível</span>
+                            <?php else: ?>
+                                <span class="badge-status badge-indisponivel"><i class="fas fa-circle-xmark me-1"></i>Emprestado</span>
+                            <?php endif; ?>
+                        </td>
+                        <?php if (isBibliotecario()): ?>
+                        <td>
+                            <a href="editar_livro.php?id=<?php echo $livro['id']; ?>" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <a href="livros.php?excluir=<?php echo $livro['id']; ?>" class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Eliminar este livro e todos os seus empréstimos?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <?php if ($totalPages > 1): ?>
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+                <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+            </li>
+            <?php endfor; ?>
+        </ul>
+    </nav>
+    <?php endif; ?>
+
+</div>
+
 <?php require 'footer.php'; ?>
-</html>
-
-
-
