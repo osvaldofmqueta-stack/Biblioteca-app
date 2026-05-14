@@ -1,0 +1,288 @@
+/* Estilos gerais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+/* Navbar */
+.navbar {
+    transition: background-color 0.5s ease;
+}
+
+.navbar.dark-mode {
+    background-color: #333 !important;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-size: 1.1rem;
+    margin: 0 10px;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #ffc107 !important;
+}
+
+/* Botão de alternância */
+.toggle-btn {
+    margin-left: 10px;
+    font-size: 20px;
+    color: white;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.toggle-btn:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Container principal */
+.container {
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode .container {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+/* Ícones */
+.fas {
+    margin-right: 5px;
+}
+/* Estilos para o footer */
+.footer {
+    background-color: #0d6efd; /* Cor primária do Bootstrap */
+    color: #ffffff;
+    padding: 40px 0;
+    margin-top: 40px;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode .footer {
+    background-color: #333; /* Cor escura para o modo escuro */
+}
+
+.footer a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #ffc107; /* Cor de destaque ao passar o mouse */
+}
+
+.footer h5 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.footer ul {
+    padding-left: 0;
+    list-style: none;
+}
+
+.footer ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer hr {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.footer .text-center p {
+    margin-bottom: 0;
+}
+/* Estilos gerais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0;
+}
+
+/* Botões */
+.btn-outline-primary {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+.btn-outline-danger {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+/* Lista de notificações */
+.list-group-item {
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+body.dark-mode .list-group-item:hover {
+    background-color: #2c2c2c;
+}
+
+/* Modo escuro para cards */
+body.dark-mode .card {
+    background-color: #2c2c2c;
+    color: #ffffff;
+}
+
+body.dark-mode .card-header {
+    background-color: #333;
+    color: #ffffff;
+}
+
+body.dark-mode .list-group-item {
+    background-color: #333;
+    color: #ffffff;
+}/* Estilos gerais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    color: #333;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+body.dark-mode {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #ffffff; /* Fundo claro padrão */
+    color: #333; /* Texto escuro padrão */
+}
+
+body.dark-mode .card {
+    background-color: #333; /* Fundo escuro */
+    color: #ffffff; /* Texto claro */
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0;
+    background-color: #0d6efd; /* Cor primária do Bootstrap */
+    color: #ffffff; /* Texto claro */
+}
+
+body.dark-mode .card-header {
+    background-color: #1e1e1e; /* Fundo escuro */
+    color: #ffffff; /* Texto claro */
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Botões */
+.btn-outline-primary {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+.btn-outline-danger {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+/* Lista de notificações */
+.list-group-item {
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    background-color: #ffffff; /* Fundo claro padrão */
+    color: #333; /* Texto escuro padrão */
+}
+
+body.dark-mode .list-group-item {
+    background-color: #2c2c2c; /* Fundo escuro */
+    color: #ffffff; /* Texto claro */
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+body.dark-mode .list-group-item:hover {
+    background-color: #3c3c3c; /* Fundo escuro ao passar o mouse */
+}
+
+/* Modo escuro para o footer */
+body.dark-mode .footer {
+    background-color: #333; /* Fundo escuro */
+    color: #ffffff; /* Texto claro */
+}

@@ -1,0 +1,1 @@
+{"version":1,"defects":{"LivroControllerTest::testAdicionarLivroComoBibliotecario":8,"LivroControllerTest::testTentarAdicionarLivroSemPermissao":8,"LivroControllerTest::testExcluirLivroComEmprestimos":8,"LivroControllerTest::testPagina\u00e7\u00e3o":8},"times":[]}

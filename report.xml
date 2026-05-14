@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="C:\xampp\htdocs\ok\phpunit.xml" tests="3" assertions="6" errors="0" failures="0" skipped="0" time="0.015509">
+    <testsuite name="SistemaBiblioteca" tests="3" assertions="6" errors="0" failures="0" skipped="0" time="0.015509">
+      <testsuite name="LivroTest" file="C:\xampp\htdocs\ok\tests\LivroTest.php" tests="3" assertions="6" errors="0" failures="0" skipped="0" time="0.015509">
+        <testcase name="testAdicionarLivro" file="C:\xampp\htdocs\ok\tests\LivroTest.php" line="26" class="LivroTest" classname="LivroTest" assertions="4" time="0.012311"/>
+        <testcase name="testExcluirLivro" file="C:\xampp\htdocs\ok\tests\LivroTest.php" line="40" class="LivroTest" classname="LivroTest" assertions="1" time="0.000809"/>
+        <testcase name="testListarLivros" file="C:\xampp\htdocs\ok\tests\LivroTest.php" line="58" class="LivroTest" classname="LivroTest" assertions="1" time="0.002390"/>
+      </testsuite>
+    </testsuite>
+  </testsuite>
+</testsuites>
