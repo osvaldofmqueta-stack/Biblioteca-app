@@ -29,6 +29,9 @@ require_once __DIR__ . '/auth.php';
                 <li class="nav-item">
                     <a class="nav-link" href="livros.php"><i class="fas fa-book"></i> Livros</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="pesquisa.php"><i class="fas fa-magnifying-glass"></i> Pesquisa</a>
+                </li>
                 <?php if (function_exists('isBibliotecario') && isBibliotecario()): ?>
                 <li class="nav-item">
                     <a class="nav-link" href="emprestimos.php"><i class="fas fa-hand-holding-heart"></i> Empréstimos</a>
