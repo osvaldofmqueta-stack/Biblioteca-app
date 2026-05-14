@@ -101,6 +101,26 @@ function searchEmprestimos($query) {
 }
 function getNotificacoes() {
     global $pdo;
-    $stmt = $pdo->query('SELECT * FROM emprestimos WHERE data_devolucao IS NULL AND data_emprestimo < NOW() - INTERVAL 7 DAY');
+    $stmt = $pdo->query('
+        SELECT e.id, e.data_emprestimo,
+               l.titulo, l.id AS livro_id,
+               u.nome, u.email,
+               DATEDIFF(CURDATE(), e.data_emprestimo) AS dias_atraso
+        FROM emprestimos e
+        JOIN livros l ON e.livro_id = l.id
+        JOIN usuarios u ON e.usuario_id = u.id
+        WHERE e.data_devolucao IS NULL
+          AND e.data_emprestimo < CURDATE() - INTERVAL 14 DAY
+        ORDER BY dias_atraso DESC
+    ');
     return $stmt->fetchAll();
+}
+
+function countAtrasos() {
+    global $pdo;
+    return $pdo->query('
+        SELECT COUNT(*) FROM emprestimos
+        WHERE data_devolucao IS NULL
+          AND data_emprestimo < CURDATE() - INTERVAL 14 DAY
+    ')->fetchColumn();
 }
