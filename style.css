@@ -321,6 +321,235 @@ body {
     background: #fff;
 }
 
+/* ===== BOOKSHELF ===== */
+.bookshelf-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.bookshelf-toolbar input {
+    max-width: 280px;
+}
+
+.shelf-section {
+    background: #fff;
+    border: 1px solid #e8eaf0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 1.5rem;
+}
+.shelf-label {
+    padding: 0.65rem 1.25rem;
+    background: #f8f9fb;
+    border-bottom: 1px solid #e8eaf0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.shelf-plank {
+    background: linear-gradient(180deg, #e8dfc8 0%, #d4c89a 100%);
+    padding: 0.5rem 1.25rem 1rem;
+    border-bottom: 4px solid #b5a47a;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+    min-height: 180px;
+}
+
+/* Book card */
+.book-card {
+    width: 110px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1);
+    position: relative;
+}
+.book-card:hover {
+    transform: translateY(-10px) scale(1.04);
+    z-index: 2;
+}
+.book-cover {
+    width: 80px;
+    height: 115px;
+    border-radius: 2px 6px 6px 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 6px;
+    box-shadow: -3px 3px 0 rgba(0,0,0,0.18), 4px 4px 14px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.25s;
+}
+.book-card:hover .book-cover {
+    box-shadow: -3px 3px 0 rgba(0,0,0,0.22), 6px 8px 24px rgba(0,0,0,0.3);
+}
+.book-cover::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 10px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 2px 0 0 2px;
+}
+.book-cover::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+    pointer-events: none;
+}
+.book-cover .book-letter {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    line-height: 1;
+    margin-bottom: 6px;
+}
+.book-cover .book-mini-title {
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+    line-height: 1.3;
+    font-weight: 600;
+    word-break: break-word;
+    max-width: 62px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+.book-status-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.8);
+}
+.dot-disponivel  { background: #22c55e; }
+.dot-emprestado  { background: #f97316; }
+
+.book-footer {
+    margin-top: 7px;
+    text-align: center;
+    width: 100%;
+}
+.book-footer .bk-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+.book-footer .bk-author {
+    font-size: 0.63rem;
+    color: #9ca3af;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+/* Book Modal */
+.book-modal-cover {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+.book-modal-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.4) 100%);
+}
+.book-modal-big {
+    width: 90px;
+    height: 130px;
+    border-radius: 3px 8px 8px 3px;
+    box-shadow: -4px 4px 0 rgba(0,0,0,0.2), 8px 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+}
+.book-modal-big::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 3px 0 0 3px;
+}
+.book-modal-big .big-letter {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.modal-content { border-radius: 16px; border: none; overflow: hidden; }
+.modal-header { border: none; padding: 1rem 1.5rem 0.5rem; }
+.modal-body   { padding: 1.5rem; }
+.modal-footer { border: none; padding: 0.5rem 1.5rem 1.5rem; }
+
+.book-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 0.9rem;
+}
+.book-detail-row:last-child { border: none; }
+.book-detail-row .lbl {
+    width: 90px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+.book-detail-row .val { font-weight: 600; color: #1a1a2e; }
+
+/* Empty shelf */
+.shelf-empty {
+    width: 100%;
+    padding: 1.5rem;
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.88rem;
+}
+
+/* Dark mode bookshelf */
+body.dark-mode .shelf-section { background: #1e1e30; border-color: #2d2d45; }
+body.dark-mode .shelf-label   { background: #252538; border-color: #2d2d45; color: #6b7280; }
+body.dark-mode .shelf-plank   { background: linear-gradient(180deg, #3d3020 0%, #2e2418 100%); border-bottom-color: #1a1208; }
+body.dark-mode .book-footer .bk-title { color: #e5e7eb; }
+body.dark-mode .book-modal-big .big-letter { color: rgba(255,255,255,0.95); }
+body.dark-mode .modal-content { background: #1e1e30; color: #e5e7eb; }
+body.dark-mode .book-detail-row { border-color: #2d2d45; }
+body.dark-mode .book-detail-row .val { color: #e5e7eb; }
+body.dark-mode .modal-header { border-color: #2d2d45; }
+
 /* ===== DARK MODE ===== */
 body.dark-mode {
     background-color: #0f0f1a;
