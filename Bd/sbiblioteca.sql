@@ -230,6 +230,22 @@ ALTER TABLE `emprestimos`
 ALTER TABLE `solicitacoes_emprestimo`
   ADD CONSTRAINT `solicitacoes_emprestimo_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
   ADD CONSTRAINT `solicitacoes_emprestimo_ibfk_2` FOREIGN KEY (`livro_id`) REFERENCES `livros` (`id`);
+--
+-- Estrutura para tabela `configuracoes`
+--
+CREATE TABLE IF NOT EXISTS `configuracoes` (
+  `chave` varchar(100) NOT NULL,
+  `valor` text DEFAULT NULL,
+  PRIMARY KEY (`chave`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT IGNORE INTO `configuracoes` (`chave`, `valor`) VALUES
+  ('nome_biblioteca', 'Biblioteca ISPCAN'),
+  ('prazo_emprestimo', '14'),
+  ('max_emprestimos_usuario', '3'),
+  ('email_contacto', ''),
+  ('morada', 'Instituto Superior Politécnico Cardeal do Nascimento');
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -91,6 +91,13 @@ function navActive(string $page, string $current): string {
                         <i class="fas fa-chart-line"></i> Relatórios
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link<?php echo navActive('admin.php', $currentPage); ?>"
+                       href="admin.php"
+                       style="<?php echo $currentPage==='admin.php' ? '' : ''; ?>">
+                        <i class="fas fa-shield-halved"></i> Admin
+                    </a>
+                </li>
                 <?php endif; ?>
             </ul>
 

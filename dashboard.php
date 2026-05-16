@@ -213,6 +213,16 @@ $nAtrasos     = count($notificacoes);
                 <i class="fas fa-chevron-right ac-arrow"></i>
             </a>
         </div>
+        <div class="col-md-6 col-lg-4">
+            <a href="admin.php" class="action-card" style="border-left:3px solid #6366f1;">
+                <div class="ac-icon" style="background:#eef2ff;color:#6366f1;"><i class="fas fa-shield-halved"></i></div>
+                <div>
+                    <div class="ac-label">Painel de Controlo</div>
+                    <div class="ac-desc">Administração avançada do sistema</div>
+                </div>
+                <i class="fas fa-chevron-right ac-arrow"></i>
+            </a>
+        </div>
         <?php endif; ?>
 
         <div class="col-md-6 col-lg-4">
