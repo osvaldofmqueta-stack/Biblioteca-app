@@ -258,10 +258,110 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
         </form>
 
-        <div class="login-footer">
+        <!-- Acesso rápido / credenciais de demonstração -->
+        <div style="margin-top:1.6rem;">
+            <button type="button"
+                    onclick="document.getElementById('demoBox').classList.toggle('d-none')"
+                    style="background:none;border:none;padding:0;font-size:0.78rem;
+                           color:#9ca3af;cursor:pointer;display:flex;align-items:center;gap:5px;
+                           width:100%;justify-content:center;">
+                <i class="fas fa-circle-info" style="color:#3b82f6;"></i>
+                Como aceder ao Painel de Controlo?
+                <i class="fas fa-chevron-down" style="font-size:0.65rem;"></i>
+            </button>
+
+            <div id="demoBox" class="d-none" style="margin-top:10px;">
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
+                            padding:12px 14px;font-size:0.78rem;color:#374151;">
+                    <p style="font-weight:700;margin:0 0 8px;color:#1e293b;font-size:0.8rem;">
+                        <i class="fas fa-key me-1" style="color:#f59e0b;"></i>
+                        Credenciais de Acesso
+                    </p>
+
+                    <!-- Admin -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;
+                                padding:8px 10px;margin-bottom:6px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                            <span style="font-size:0.7rem;font-weight:700;color:#6366f1;
+                                         background:#eef2ff;padding:1px 8px;border-radius:20px;">
+                                🛡 Administrador
+                            </span>
+                            <button type="button" class="btn-fill-quick"
+                                    onclick="preencherLogin('admin@example.com','admin123')"
+                                    style="font-size:0.68rem;background:#3b82f6;color:#fff;
+                                           border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
+                                Usar este
+                            </button>
+                        </div>
+                        <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
+                            <span style="color:#9ca3af;">Email:</span> admin@example.com<br>
+                            <span style="color:#9ca3af;">Senha:</span> admin123
+                        </div>
+                    </div>
+
+                    <!-- Bibliotecário -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;
+                                padding:8px 10px;margin-bottom:6px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                            <span style="font-size:0.7rem;font-weight:700;color:#22c55e;
+                                         background:#f0fdf4;padding:1px 8px;border-radius:20px;">
+                                📚 Bibliotecário
+                            </span>
+                            <button type="button" class="btn-fill-quick"
+                                    onclick="preencherLogin('bibliot@example.com','senha1234')"
+                                    style="font-size:0.68rem;background:#22c55e;color:#fff;
+                                           border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
+                                Usar este
+                            </button>
+                        </div>
+                        <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
+                            <span style="color:#9ca3af;">Email:</span> bibliot@example.com<br>
+                            <span style="color:#9ca3af;">Senha:</span> senha1234
+                        </div>
+                    </div>
+
+                    <!-- Utilizador -->
+                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;
+                                padding:8px 10px;margin-bottom:4px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                            <span style="font-size:0.7rem;font-weight:700;color:#3b82f6;
+                                         background:#eff6ff;padding:1px 8px;border-radius:20px;">
+                                👤 Utilizador
+                            </span>
+                            <button type="button" class="btn-fill-quick"
+                                    onclick="preencherLogin('user@example.com','senha12345')"
+                                    style="font-size:0.68rem;background:#3b82f6;color:#fff;
+                                           border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
+                                Usar este
+                            </button>
+                        </div>
+                        <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
+                            <span style="color:#9ca3af;">Email:</span> user@example.com<br>
+                            <span style="color:#9ca3af;">Senha:</span> senha12345
+                        </div>
+                    </div>
+
+                    <p style="color:#9ca3af;font-size:0.7rem;margin:6px 0 0;text-align:center;">
+                        <i class="fas fa-shield-halved me-1"></i>
+                        O Painel de Controlo só está disponível para Administradores
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="login-footer" style="margin-top:1.2rem;">
             &copy; <?php echo date('Y'); ?> Sistema de Biblioteca. Todos os direitos reservados.
         </div>
     </div>
+
+    <script>
+    function preencherLogin(email, senha) {
+        document.querySelector('input[name="email"]').value = email;
+        document.querySelector('input[name="senha"]').value = senha;
+        document.getElementById('demoBox').classList.add('d-none');
+        document.querySelector('input[name="email"]').focus();
+    }
+    </script>
 
 </body>
 </html>
