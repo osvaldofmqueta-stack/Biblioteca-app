@@ -77,6 +77,43 @@ require 'header.php';
 <div class="page-wrapper">
 
     <!-- Cabeçalho da página -->
+    <!-- ── Barra de permissões ──────────────────────────────────── -->
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
+                padding:9px 14px;margin-bottom:14px;display:flex;
+                align-items:center;gap:10px;flex-wrap:wrap;font-size:0.76rem;">
+        <span style="font-weight:700;color:#374151;white-space:nowrap;">
+            <i class="fas fa-shield-halved me-1" style="color:#6366f1;"></i>Permissões:
+        </span>
+        <span style="display:flex;align-items:center;gap:5px;" title="Ver o catálogo de livros">
+            <i class="fas fa-eye" style="color:#22c55e;font-size:0.7rem;"></i>
+            <span style="color:#374151;">Visualizar</span>
+            <span style="background:#f0fdf4;color:#15803d;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">👤 Utilizador&nbsp;·&nbsp;📚 Bibliotecário&nbsp;·&nbsp;🛡 Admin</span>
+        </span>
+        <span style="color:#d1d5db;">|</span>
+        <span style="display:flex;align-items:center;gap:5px;" title="Adicionar livros ao catálogo">
+            <i class="fas fa-plus-circle" style="color:#3b82f6;font-size:0.7rem;"></i>
+            <span style="color:#374151;">Adicionar</span>
+            <span style="background:#eff6ff;color:#1d4ed8;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">📚 Bibliotecário&nbsp;·&nbsp;🛡 Admin</span>
+        </span>
+        <span style="color:#d1d5db;">|</span>
+        <span style="display:flex;align-items:center;gap:5px;" title="Editar informações de livros">
+            <i class="fas fa-pen" style="color:#f59e0b;font-size:0.7rem;"></i>
+            <span style="color:#374151;">Editar</span>
+            <span style="background:#fffbeb;color:#b45309;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">📚 Bibliotecário&nbsp;·&nbsp;🛡 Admin</span>
+        </span>
+        <span style="color:#d1d5db;">|</span>
+        <span style="display:flex;align-items:center;gap:5px;" title="Eliminar livros do catálogo">
+            <i class="fas fa-trash" style="color:#ef4444;font-size:0.7rem;"></i>
+            <span style="color:#374151;">Eliminar</span>
+            <span style="background:#fef2f2;color:#b91c1c;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">📚 Bibliotecário&nbsp;·&nbsp;🛡 Admin</span>
+        </span>
+        <?php if (!isBibliotecario()): ?>
+        <span style="margin-left:auto;color:#9ca3af;font-style:italic;font-size:0.72rem;">
+            <i class="fas fa-lock me-1"></i>O seu nível (Utilizador) tem acesso apenas à visualização.
+        </span>
+        <?php endif; ?>
+    </div>
+
     <div class="page-header d-flex align-items-center justify-content-between">
         <div>
             <h1><i class="fas fa-book-open me-2" style="color:#3b82f6;"></i>Livros</h1>

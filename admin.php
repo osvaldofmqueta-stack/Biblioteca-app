@@ -467,6 +467,44 @@ require 'header.php';
         .dark-mode .lvl-select { background-color:#374151; border-color:#4b5563; color:#f9fafb; }
         </style>
 
+        <!-- ── Barra de permissões de utilizadores ───────────────── -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
+                    padding:9px 14px;margin-bottom:16px;display:flex;
+                    align-items:center;gap:10px;flex-wrap:wrap;font-size:0.76rem;">
+            <span style="font-weight:700;color:#374151;white-space:nowrap;">
+                <i class="fas fa-shield-halved me-1" style="color:#6366f1;"></i>Permissões de Gestão de Utilizadores:
+            </span>
+            <span style="display:flex;align-items:center;gap:5px;">
+                <i class="fas fa-user-plus" style="color:#3b82f6;font-size:0.7rem;"></i>
+                <span style="color:#374151;">Criar utilizador</span>
+                <span style="background:#eef2ff;color:#4338ca;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">🛡 Admin</span>
+            </span>
+            <span style="color:#d1d5db;">|</span>
+            <span style="display:flex;align-items:center;gap:5px;">
+                <i class="fas fa-pen" style="color:#f59e0b;font-size:0.7rem;"></i>
+                <span style="color:#374151;">Editar dados</span>
+                <span style="background:#eef2ff;color:#4338ca;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">🛡 Admin</span>
+            </span>
+            <span style="color:#d1d5db;">|</span>
+            <span style="display:flex;align-items:center;gap:5px;">
+                <i class="fas fa-key" style="color:#f59e0b;font-size:0.7rem;"></i>
+                <span style="color:#374151;">Redefinir senha</span>
+                <span style="background:#eef2ff;color:#4338ca;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">🛡 Admin</span>
+            </span>
+            <span style="color:#d1d5db;">|</span>
+            <span style="display:flex;align-items:center;gap:5px;">
+                <i class="fas fa-arrows-up-down" style="color:#22c55e;font-size:0.7rem;"></i>
+                <span style="color:#374151;">Alterar nível de acesso</span>
+                <span style="background:#eef2ff;color:#4338ca;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">🛡 Admin</span>
+            </span>
+            <span style="color:#d1d5db;">|</span>
+            <span style="display:flex;align-items:center;gap:5px;">
+                <i class="fas fa-trash" style="color:#ef4444;font-size:0.7rem;"></i>
+                <span style="color:#374151;">Eliminar utilizador</span>
+                <span style="background:#eef2ff;color:#4338ca;padding:1px 8px;border-radius:20px;font-weight:700;font-size:0.7rem;">🛡 Admin</span>
+            </span>
+        </div>
+
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h2 style="font-size:1.4rem;font-weight:800;margin:0;">Utilizadores &amp; Acessos</h2>
