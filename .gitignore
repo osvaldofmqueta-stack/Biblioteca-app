@@ -1,0 +1,38 @@
+# Dependências PHP (instalar com: composer install)
+/vendor/
+
+# Ficheiros de configuração local com dados sensíveis
+# (copiar config.example.php e preencher localmente)
+# config.php  # manter no repo pois usa variáveis de ambiente
+
+# Exports e PDFs gerados
+/exports/*.pdf
+/exports/*.csv
+
+# Logs e temporários
+*.log
+/tmp/
+*.tmp
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / editores
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Cache do PHP/Composer
+.cache/
+.php_cs.cache
+
+# Replit interno
+.replit
+replit.nix
+.upm/
+.agents/
