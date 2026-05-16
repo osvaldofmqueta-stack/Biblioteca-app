@@ -292,79 +292,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </button>
 
             <div id="demoBox" class="d-none" style="margin-top:10px;">
-                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;
-                            padding:12px 14px;font-size:0.78rem;color:#374151;">
-                    <p style="font-weight:700;margin:0 0 8px;color:#1e293b;font-size:0.8rem;">
-                        <i class="fas fa-key me-1" style="color:#f59e0b;"></i>
-                        Credenciais de Acesso
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;
+                            padding:14px;font-size:0.78rem;color:#374151;">
+                    <p style="font-weight:800;margin:0 0 10px;color:#1e293b;font-size:0.82rem;
+                               display:flex;align-items:center;gap:6px;">
+                        <i class="fas fa-key" style="color:#f59e0b;"></i>
+                        Todas as Credenciais de Acesso
                     </p>
 
-                    <!-- Admin -->
-                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;
-                                padding:8px 10px;margin-bottom:6px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                            <span style="font-size:0.7rem;font-weight:700;color:#6366f1;
-                                         background:#eef2ff;padding:1px 8px;border-radius:20px;">
-                                🛡 Administrador
-                            </span>
-                            <button type="button"
-                                    onclick="preencherLogin('admin@example.com','admin123')"
-                                    style="font-size:0.68rem;background:#3b82f6;color:#fff;
-                                           border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
-                                Usar este
-                            </button>
-                        </div>
-                        <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
-                            <span style="color:#9ca3af;">Email:</span> admin@example.com<br>
-                            <span style="color:#9ca3af;">Senha:</span> admin123
-                        </div>
+                    <!-- ── ADMINISTRADORES ── -->
+                    <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;
+                                letter-spacing:.06em;color:#6366f1;margin:0 0 5px;
+                                display:flex;align-items:center;gap:5px;">
+                        <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#6366f1;"></span>
+                        Administradores — acesso total + painel
                     </div>
 
-                    <!-- Bibliotecário -->
-                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;
-                                padding:8px 10px;margin-bottom:6px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                            <span style="font-size:0.7rem;font-weight:700;color:#22c55e;
-                                         background:#f0fdf4;padding:1px 8px;border-radius:20px;">
-                                📚 Bibliotecário
+                    <?php
+                    $credAdmin = [
+                        ['nome'=>'Admin',             'email'=>'admin@example.com',  'senha'=>'admin123'],
+                        ['nome'=>'Hélio Caldeira',    'email'=>'helio@example.com',  'senha'=>'helio123'],
+                        ['nome'=>'Prof.ª Marliés',    'email'=>'Marlis@example.com', 'senha'=>'senha123'],
+                    ];
+                    foreach ($credAdmin as $c): ?>
+                    <div style="background:#fff;border:1px solid #e0e7ff;border-radius:8px;
+                                padding:7px 10px;margin-bottom:5px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                            <span style="font-size:0.69rem;font-weight:700;color:#4f46e5;">
+                                🛡 <?= htmlspecialchars($c['nome'], ENT_QUOTES, 'UTF-8') ?>
                             </span>
                             <button type="button"
-                                    onclick="preencherLogin('bibliot@example.com','biblio123')"
-                                    style="font-size:0.68rem;background:#22c55e;color:#fff;
-                                           border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
-                                Usar este
+                                    onclick="preencherLogin('<?= $c['email'] ?>','<?= $c['senha'] ?>')"
+                                    style="font-size:0.67rem;background:#6366f1;color:#fff;
+                                           border:none;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:600;">
+                                Usar
                             </button>
                         </div>
-                        <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
-                            <span style="color:#9ca3af;">Email:</span> bibliot@example.com<br>
-                            <span style="color:#9ca3af;">Senha:</span> biblio123
+                        <div style="font-family:monospace;color:#475569;font-size:0.73rem;line-height:1.65;">
+                            <span style="color:#9ca3af;">Email:</span> <?= htmlspecialchars($c['email'], ENT_QUOTES, 'UTF-8') ?><br>
+                            <span style="color:#9ca3af;">Senha:</span> <?= htmlspecialchars($c['senha'], ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </div>
+                    <?php endforeach; ?>
 
-                    <!-- Utilizador -->
-                    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;
-                                padding:8px 10px;margin-bottom:4px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                            <span style="font-size:0.7rem;font-weight:700;color:#3b82f6;
-                                         background:#eff6ff;padding:1px 8px;border-radius:20px;">
-                                👤 Utilizador
+                    <!-- ── BIBLIOTECÁRIOS ── -->
+                    <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;
+                                letter-spacing:.06em;color:#16a34a;margin:8px 0 5px;
+                                display:flex;align-items:center;gap:5px;">
+                        <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#22c55e;"></span>
+                        Bibliotecários — gestão de livros + relatórios
+                    </div>
+
+                    <?php
+                    $credBiblio = [
+                        ['nome'=>'Biblio',       'email'=>'bibliot@example.com', 'senha'=>'biblio123'],
+                        ['nome'=>'Edson André',  'email'=>'edson@example.com',   'senha'=>'edson123'],
+                    ];
+                    foreach ($credBiblio as $c): ?>
+                    <div style="background:#fff;border:1px solid #bbf7d0;border-radius:8px;
+                                padding:7px 10px;margin-bottom:5px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                            <span style="font-size:0.69rem;font-weight:700;color:#15803d;">
+                                📚 <?= htmlspecialchars($c['nome'], ENT_QUOTES, 'UTF-8') ?>
                             </span>
                             <button type="button"
-                                    onclick="preencherLogin('user@example.com','user123')"
-                                    style="font-size:0.68rem;background:#3b82f6;color:#fff;
-                                           border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
-                                Usar este
+                                    onclick="preencherLogin('<?= $c['email'] ?>','<?= $c['senha'] ?>')"
+                                    style="font-size:0.67rem;background:#22c55e;color:#fff;
+                                           border:none;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:600;">
+                                Usar
                             </button>
                         </div>
-                        <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
-                            <span style="color:#9ca3af;">Email:</span> user@example.com<br>
-                            <span style="color:#9ca3af;">Senha:</span> user123
+                        <div style="font-family:monospace;color:#475569;font-size:0.73rem;line-height:1.65;">
+                            <span style="color:#9ca3af;">Email:</span> <?= htmlspecialchars($c['email'], ENT_QUOTES, 'UTF-8') ?><br>
+                            <span style="color:#9ca3af;">Senha:</span> <?= htmlspecialchars($c['senha'], ENT_QUOTES, 'UTF-8') ?>
                         </div>
                     </div>
+                    <?php endforeach; ?>
 
-                    <p style="color:#9ca3af;font-size:0.7rem;margin:6px 0 0;text-align:center;">
+                    <!-- ── UTILIZADORES ── -->
+                    <div style="font-size:0.68rem;font-weight:800;text-transform:uppercase;
+                                letter-spacing:.06em;color:#1d4ed8;margin:8px 0 5px;
+                                display:flex;align-items:center;gap:5px;">
+                        <span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#3b82f6;"></span>
+                        Utilizadores — consulta + empréstimos
+                    </div>
+
+                    <?php
+                    $credUser = [
+                        ['nome'=>'User',           'email'=>'user@example.com',  'senha'=>'user123'],
+                        ['nome'=>'Mario Cambambe', 'email'=>'mario@gmail.com',   'senha'=>'mario123'],
+                    ];
+                    foreach ($credUser as $c): ?>
+                    <div style="background:#fff;border:1px solid #bfdbfe;border-radius:8px;
+                                padding:7px 10px;margin-bottom:5px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+                            <span style="font-size:0.69rem;font-weight:700;color:#1d4ed8;">
+                                👤 <?= htmlspecialchars($c['nome'], ENT_QUOTES, 'UTF-8') ?>
+                            </span>
+                            <button type="button"
+                                    onclick="preencherLogin('<?= $c['email'] ?>','<?= $c['senha'] ?>')"
+                                    style="font-size:0.67rem;background:#3b82f6;color:#fff;
+                                           border:none;border-radius:6px;padding:2px 9px;cursor:pointer;font-weight:600;">
+                                Usar
+                            </button>
+                        </div>
+                        <div style="font-family:monospace;color:#475569;font-size:0.73rem;line-height:1.65;">
+                            <span style="color:#9ca3af;">Email:</span> <?= htmlspecialchars($c['email'], ENT_QUOTES, 'UTF-8') ?><br>
+                            <span style="color:#9ca3af;">Senha:</span> <?= htmlspecialchars($c['senha'], ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+
+                    <p style="color:#9ca3af;font-size:0.69rem;margin:8px 0 0;text-align:center;line-height:1.5;">
                         <i class="fas fa-shield-halved me-1"></i>
-                        O Painel de Controlo só está disponível para Administradores
+                        Painel de Controlo: Admins &amp; Bibliotecários &nbsp;|&nbsp;
+                        Empréstimos: todos os níveis
                     </p>
                 </div>
             </div>
