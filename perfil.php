@@ -76,6 +76,24 @@ $stDevolvidos = $pdo->prepare('SELECT COUNT(*) FROM emprestimos WHERE usuario_id
 $stDevolvidos->execute([$userId]);
 $empDevolvidos = (int)$stDevolvidos->fetchColumn();
 
+/* ── Histórico de empréstimos ────────────────────────────────── */
+$stHistorico = $pdo->prepare("
+    SELECT e.id, l.titulo, l.autor, l.localizacao,
+           e.data_emprestimo, e.data_devolucao,
+           CASE
+               WHEN e.data_devolucao IS NOT NULL THEN 'devolvido'
+               WHEN e.data_emprestimo < CURDATE() - INTERVAL 14 DAY THEN 'atrasado'
+               ELSE 'ativo'
+           END AS estado
+    FROM emprestimos e
+    JOIN livros l ON e.livro_id = l.id
+    WHERE e.usuario_id = ?
+    ORDER BY e.id DESC
+    LIMIT 50
+");
+$stHistorico->execute([$userId]);
+$historico = $stHistorico->fetchAll();
+
 $nivelLabel = nivelLabel($user['nivel_acesso']);
 $nivelCls   = nivelCssClass($user['nivel_acesso']);
 $letra = mb_strtoupper(mb_substr(trim($user['nome']), 0, 1, 'UTF-8'), 'UTF-8');
@@ -478,6 +496,140 @@ require 'header.php';
 
         </div>
     </div>
+
+    <!-- ── Histórico de Empréstimos ─────────────────────────────── -->
+    <div class="form-card mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div class="form-card-title mb-0">
+                <i class="fas fa-clock-rotate-left"></i> Histórico de Empréstimos
+                <span style="font-size:0.72rem;font-weight:600;background:#f1f5f9;
+                              color:#64748b;padding:2px 10px;border-radius:20px;
+                              margin-left:6px;letter-spacing:0;"><?= count($historico) ?></span>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <input type="text" id="histSearch"
+                       class="form-control form-control-sm"
+                       placeholder="🔍 Filtrar título ou autor…"
+                       style="max-width:200px;font-size:0.8rem;">
+                <select id="histFilter" class="form-select form-select-sm" style="width:auto;font-size:0.8rem;">
+                    <option value="">Todos</option>
+                    <option value="ativo">Em curso</option>
+                    <option value="atrasado">Em atraso</option>
+                    <option value="devolvido">Devolvidos</option>
+                </select>
+            </div>
+        </div>
+
+        <?php if (empty($historico)): ?>
+        <div style="text-align:center;padding:40px 20px;">
+            <div style="font-size:2.5rem;margin-bottom:10px;">📚</div>
+            <p style="color:#9ca3af;font-size:0.88rem;margin:0;">
+                Ainda não realizou nenhum empréstimo.
+            </p>
+        </div>
+        <?php else: ?>
+        <div style="overflow-x:auto;">
+        <table class="table table-hover align-middle mb-0" style="font-size:0.83rem;" id="histTable">
+            <thead style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
+                <tr>
+                    <th style="padding:10px 12px;font-size:0.7rem;text-transform:uppercase;
+                                letter-spacing:.06em;color:#64748b;font-weight:700;">#</th>
+                    <th style="padding:10px 12px;font-size:0.7rem;text-transform:uppercase;
+                                letter-spacing:.06em;color:#64748b;font-weight:700;">Livro</th>
+                    <th style="padding:10px 12px;font-size:0.7rem;text-transform:uppercase;
+                                letter-spacing:.06em;color:#64748b;font-weight:700;">Autor</th>
+                    <th style="padding:10px 12px;font-size:0.7rem;text-transform:uppercase;
+                                letter-spacing:.06em;color:#64748b;font-weight:700;">Localização</th>
+                    <th style="padding:10px 12px;font-size:0.7rem;text-transform:uppercase;
+                                letter-spacing:.06em;color:#64748b;font-weight:700;">Empréstimo</th>
+                    <th style="padding:10px 12px;font-size:0.7rem;text-transform:uppercase;
+                                letter-spacing:.06em;color:#64748b;font-weight:700;">Devolução</th>
+                    <th style="padding:10px 12px;font-size:0.7rem;text-transform:uppercase;
+                                letter-spacing:.06em;color:#64748b;font-weight:700;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($historico as $h):
+                $estadoCls  = match($h['estado']) {
+                    'devolvido' => 'badge-disponivel',
+                    'atrasado'  => 'badge-status' ,
+                    default     => 'badge-biblio',
+                };
+                $estadoBg   = match($h['estado']) {
+                    'devolvido' => '#f0fdf4;color:#16a34a',
+                    'atrasado'  => '#fef2f2;color:#dc2626',
+                    default     => '#eff6ff;color:#2563eb',
+                };
+                $estadoTxt  = match($h['estado']) {
+                    'devolvido' => 'Devolvido',
+                    'atrasado'  => 'Em atraso',
+                    default     => 'Em curso',
+                };
+                $estadoIco  = match($h['estado']) {
+                    'devolvido' => 'fa-circle-check',
+                    'atrasado'  => 'fa-triangle-exclamation',
+                    default     => 'fa-clock',
+                };
+            ?>
+            <tr data-estado="<?= $h['estado'] ?>"
+                data-search="<?= strtolower(h($h['titulo']) . ' ' . h($h['autor'])) ?>">
+                <td style="padding:10px 12px;color:#94a3b8;"><?= $h['id'] ?></td>
+                <td style="padding:10px 12px;max-width:200px;">
+                    <div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;
+                                white-space:nowrap;" title="<?= h($h['titulo']) ?>">
+                        <?= h($h['titulo']) ?>
+                    </div>
+                </td>
+                <td style="padding:10px 12px;color:#6b7280;white-space:nowrap;">
+                    <?= $h['autor'] ? h($h['autor']) : '—' ?>
+                </td>
+                <td style="padding:10px 12px;">
+                    <?php if ($h['localizacao']): ?>
+                    <span style="background:#f1f5f9;color:#475569;padding:2px 8px;
+                                  border-radius:6px;font-size:0.75rem;font-weight:600;
+                                  font-family:monospace;">
+                        <i class="fas fa-map-pin" style="font-size:0.65rem;margin-right:3px;"></i>
+                        <?= h($h['localizacao']) ?>
+                    </span>
+                    <?php else: ?>
+                        <span style="color:#cbd5e1;">—</span>
+                    <?php endif; ?>
+                </td>
+                <td style="padding:10px 12px;white-space:nowrap;color:#374151;">
+                    <i class="fas fa-calendar-plus" style="color:#94a3b8;margin-right:4px;font-size:0.75rem;"></i>
+                    <?= date('d/m/Y', strtotime($h['data_emprestimo'])) ?>
+                </td>
+                <td style="padding:10px 12px;white-space:nowrap;">
+                    <?php if ($h['data_devolucao']): ?>
+                        <span style="color:#16a34a;">
+                            <i class="fas fa-calendar-check" style="margin-right:4px;font-size:0.75rem;"></i>
+                            <?= date('d/m/Y', strtotime($h['data_devolucao'])) ?>
+                        </span>
+                    <?php else: ?>
+                        <span style="color:#9ca3af;font-style:italic;font-size:0.78rem;">Pendente</span>
+                    <?php endif; ?>
+                </td>
+                <td style="padding:10px 12px;">
+                    <span style="background:<?= $estadoBg ?>;padding:3px 10px;border-radius:20px;
+                                  font-size:0.72rem;font-weight:700;white-space:nowrap;display:inline-flex;
+                                  align-items:center;gap:4px;">
+                        <i class="fas <?= $estadoIco ?>" style="font-size:0.65rem;"></i>
+                        <?= $estadoTxt ?>
+                    </span>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        </div>
+
+        <!-- Sem resultados após filtro -->
+        <div id="histEmpty" style="display:none;text-align:center;padding:28px;color:#9ca3af;font-size:0.85rem;">
+            <i class="fas fa-magnifying-glass me-2"></i> Nenhum resultado encontrado.
+        </div>
+        <?php endif; ?>
+    </div>
+
 </div>
 
 <!-- Toast de cópia -->
@@ -556,6 +708,31 @@ function mostrarToast(msg, cor = '#22c55e') {
     t.style.opacity = '1';
     setTimeout(() => t.style.opacity = '0', 2500);
 }
+
+/* ── Filtro do histórico ─────────────────────────────────── */
+(function () {
+    const searchEl  = document.getElementById('histSearch');
+    const filterEl  = document.getElementById('histFilter');
+    const emptyEl   = document.getElementById('histEmpty');
+    if (!searchEl) return;
+
+    function aplicarFiltro() {
+        const q   = searchEl.value.toLowerCase();
+        const est = filterEl.value;
+        let visíveis = 0;
+        document.querySelectorAll('#histTable tbody tr').forEach(row => {
+            const matchSearch = !q || row.dataset.search.includes(q);
+            const matchEstado = !est || row.dataset.estado === est;
+            const show = matchSearch && matchEstado;
+            row.style.display = show ? '' : 'none';
+            if (show) visíveis++;
+        });
+        if (emptyEl) emptyEl.style.display = visíveis === 0 ? 'block' : 'none';
+    }
+
+    searchEl.addEventListener('input', aplicarFiltro);
+    filterEl.addEventListener('change', aplicarFiltro);
+})();
 
 /* ── Força da senha ──────────────────────────────────────── */
 document.getElementById('f_nova').addEventListener('input', function () {
