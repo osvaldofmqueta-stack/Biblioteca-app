@@ -152,11 +152,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .error-box {
             background: #fef2f2; border: 1px solid #fecaca;
-            border-radius: 10px; padding: 0.75rem 1rem;
-            color: #dc2626; font-size: 0.85rem;
-            display: flex; align-items: center; gap: 8px;
+            border-left: 4px solid #ef4444;
+            border-radius: 10px; padding: 0.85rem 1rem;
+            color: #b91c1c; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 10px;
             margin-bottom: 1.2rem;
+            animation: shakeIn .4s ease;
         }
+        @keyframes shakeIn {
+            0%   { transform: translateX(-8px); opacity: 0; }
+            30%  { transform: translateX(6px); }
+            60%  { transform: translateX(-4px); }
+            80%  { transform: translateX(3px); }
+            100% { transform: translateX(0);   opacity: 1; }
+        }
+        .error-box .err-icon {
+            width: 32px; height: 32px; flex-shrink: 0;
+            background: #fee2e2; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; color: #ef4444;
+        }
+        .error-box .err-title { font-weight: 700; font-size: 0.82rem; color: #991b1b; }
+        .error-box .err-msg   { font-size: 0.8rem; color: #b91c1c; margin-top: 1px; }
 
         .login-footer {
             margin-top: 2rem;
@@ -233,7 +250,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <?php if ($error): ?>
         <div class="error-box">
-            <i class="fas fa-circle-exclamation"></i> <?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?>
+            <div class="err-icon"><i class="fas fa-lock"></i></div>
+            <div>
+                <div class="err-title">Acesso negado</div>
+                <div class="err-msg"><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?> Verifique as suas credenciais e tente novamente.</div>
+            </div>
         </div>
         <?php endif; ?>
 
@@ -286,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                          background:#eef2ff;padding:1px 8px;border-radius:20px;">
                                 🛡 Administrador
                             </span>
-                            <button type="button" class="btn-fill-quick"
+                            <button type="button"
                                     onclick="preencherLogin('admin@example.com','admin123')"
                                     style="font-size:0.68rem;background:#3b82f6;color:#fff;
                                            border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
@@ -307,8 +328,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                          background:#f0fdf4;padding:1px 8px;border-radius:20px;">
                                 📚 Bibliotecário
                             </span>
-                            <button type="button" class="btn-fill-quick"
-                                    onclick="preencherLogin('bibliot@example.com','senha1234')"
+                            <button type="button"
+                                    onclick="preencherLogin('bibliot@example.com','biblio123')"
                                     style="font-size:0.68rem;background:#22c55e;color:#fff;
                                            border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
                                 Usar este
@@ -316,7 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
                             <span style="color:#9ca3af;">Email:</span> bibliot@example.com<br>
-                            <span style="color:#9ca3af;">Senha:</span> senha1234
+                            <span style="color:#9ca3af;">Senha:</span> biblio123
                         </div>
                     </div>
 
@@ -328,8 +349,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                          background:#eff6ff;padding:1px 8px;border-radius:20px;">
                                 👤 Utilizador
                             </span>
-                            <button type="button" class="btn-fill-quick"
-                                    onclick="preencherLogin('user@example.com','senha12345')"
+                            <button type="button"
+                                    onclick="preencherLogin('user@example.com','user123')"
                                     style="font-size:0.68rem;background:#3b82f6;color:#fff;
                                            border:none;border-radius:6px;padding:2px 8px;cursor:pointer;">
                                 Usar este
@@ -337,7 +358,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div style="font-family:monospace;color:#475569;font-size:0.76rem;line-height:1.7;">
                             <span style="color:#9ca3af;">Email:</span> user@example.com<br>
-                            <span style="color:#9ca3af;">Senha:</span> senha12345
+                            <span style="color:#9ca3af;">Senha:</span> user123
                         </div>
                     </div>
 
