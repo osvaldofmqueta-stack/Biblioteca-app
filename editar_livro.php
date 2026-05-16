@@ -20,15 +20,16 @@ if ($livro === false) {
 $msg = ''; $msgType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_livro'])) {
-    $titulo = sanitizeInput($_POST['titulo'] ?? '');
-    $autor  = sanitizeInput($_POST['autor']  ?? '');
-    $ano    = sanitizeInt($_POST['ano_publicacao'] ?? 0);
+    $titulo      = sanitizeInput($_POST['titulo']          ?? '');
+    $autor       = sanitizeInput($_POST['autor']           ?? '');
+    $ano         = sanitizeInt($_POST['ano_publicacao']    ?? 0);
+    $localizacao = sanitizeInput($_POST['localizacao']     ?? '');
 
     if (!$titulo || !$autor || $ano < 1900 || $ano > (int) date('Y') + 1) {
         $msg = 'Preencha todos os campos correctamente.'; $msgType = 'danger';
     } else {
-        $pdo->prepare('UPDATE livros SET titulo = ?, autor = ?, ano_publicacao = ? WHERE id = ?')
-            ->execute([$titulo, $autor, $ano, $id]);
+        $pdo->prepare('UPDATE livros SET titulo = ?, autor = ?, ano_publicacao = ?, localizacao = ? WHERE id = ?')
+            ->execute([$titulo, $autor, $ano, $localizacao ?: null, $id]);
         header('Location: livros.php');
         exit();
     }
@@ -71,11 +72,22 @@ require __DIR__ . '/header.php';
                            value="<?php echo h($livro['autor']); ?>"
                            maxlength="255" required>
                 </div>
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="form-label">Ano de Publicação <span style="color:#ef4444;">*</span></label>
                     <input type="number" name="ano_publicacao" class="form-control"
                            value="<?php echo (int) $livro['ano_publicacao']; ?>"
                            min="1000" max="<?php echo (int) date('Y') + 1; ?>" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">
+                        <i class="fas fa-location-dot me-1" style="color:#6366f1;"></i>
+                        Localização na Biblioteca
+                    </label>
+                    <input type="text" name="localizacao" class="form-control"
+                           value="<?php echo h($livro['localizacao'] ?? ''); ?>"
+                           maxlength="100"
+                           placeholder="Ex: Estante A-2, Sala 1 / Prateleira 3">
+                    <div class="form-text">Identifica onde o livro se encontra fisicamente na biblioteca.</div>
                 </div>
                 <div class="d-flex gap-2">
                     <button type="submit" name="editar_livro" class="btn btn-primary">

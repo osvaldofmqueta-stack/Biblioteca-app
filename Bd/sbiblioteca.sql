@@ -80,6 +80,7 @@ CREATE TABLE `livros` (
   `titulo` varchar(255) NOT NULL,
   `autor` varchar(255) NOT NULL,
   `ano_publicacao` int(11) DEFAULT NULL,
+  `localizacao` varchar(100) DEFAULT NULL,
   `disponivel` tinyint(1) DEFAULT 1,
   `ativo` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

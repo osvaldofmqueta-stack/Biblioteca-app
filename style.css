@@ -671,6 +671,24 @@ body.dark-mode .stat-card-alert { border-color: #4b1e1e !important; }
     max-width: 62px;
     text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
+.book-loc-badge {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.45);
+    color: rgba(255,255,255,0.92);
+    font-size: 0.42rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 20px;
+    white-space: nowrap;
+    max-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.02em;
+    z-index: 2;
+}
 .book-status-dot {
     position: absolute;
     top: 6px;
