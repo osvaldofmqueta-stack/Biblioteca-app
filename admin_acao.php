@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: admin.php'); exit();
 }
 
-$acao       = sanitizeInput($_POST['acao'] ?? '');
+$acao        = sanitizeInput($_POST['acao'] ?? '');
 $redirectTab = sanitizeInput($_POST['redirect_tab'] ?? 'painel');
 
 function flash(string $msg, string $tipo = 'success'): void
@@ -21,8 +21,8 @@ switch ($acao) {
 
     /* ── Novo utilizador ─────────────────────────────────────────── */
     case 'novo_usuario':
-        $nome   = sanitizeInput($_POST['nome']   ?? '');
-        $email  = trim($_POST['email'] ?? '');
+        $nome   = sanitizeInput($_POST['nome']  ?? '');
+        $email  = trim($_POST['email']  ?? '');
         $senha  = $_POST['senha'] ?? '';
         $nivel  = sanitizeInput($_POST['nivel_acesso'] ?? 'usuario');
 
@@ -37,9 +37,39 @@ switch ($acao) {
             flash('Este e-mail já está registado.', 'danger');
             break;
         }
-        $pdo->prepare('INSERT INTO usuarios (nome, email, senha, nivel_acesso) VALUES (?, ?, ?, ?)')
-            ->execute([$nome, $email, hashSenha($senha), $nivel]);
-        flash('Utilizador "' . h($nome) . '" criado com sucesso!');
+        $pdo->prepare('INSERT INTO usuarios (nome, email, senha, senha_temp, nivel_acesso) VALUES (?, ?, ?, ?, ?)')
+            ->execute([$nome, $email, hashSenha($senha), $senha, $nivel]);
+        flash('Utilizador "' . h($nome) . '" criado! Email: ' . h($email) . ' | Senha visível no cartão.', 'success');
+        break;
+
+    /* ── Editar utilizador ───────────────────────────────────────── */
+    case 'editar_usuario':
+        $uid   = sanitizeInt($_POST['user_id'] ?? 0);
+        $nome  = sanitizeInput($_POST['nome']  ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $nivel = sanitizeInput($_POST['nivel_acesso'] ?? 'usuario');
+
+        if ($uid < 1 || !$nome || !filter_var($email, FILTER_VALIDATE_EMAIL)
+            || !in_array($nivel, ['usuario','bibliotecario','admin'], true)) {
+            flash('Dados inválidos. Verifique os campos.', 'danger');
+            break;
+        }
+        // Verifica se o e-mail já existe noutro utilizador
+        $check = $pdo->prepare('SELECT id FROM usuarios WHERE email = ? AND id != ?');
+        $check->execute([$email, $uid]);
+        if ($check->fetch()) {
+            flash('Este e-mail já está a ser usado por outro utilizador.', 'danger');
+            break;
+        }
+        // Protege a conta própria de alterar o seu nível
+        if ($uid === (int)($_SESSION['user_id'] ?? 0)) {
+            $pdo->prepare('UPDATE usuarios SET nome = ?, email = ? WHERE id = ?')
+                ->execute([$nome, $email, $uid]);
+        } else {
+            $pdo->prepare('UPDATE usuarios SET nome = ?, email = ?, nivel_acesso = ? WHERE id = ?')
+                ->execute([$nome, $email, $nivel, $uid]);
+        }
+        flash('Utilizador "' . h($nome) . '" actualizado com sucesso!');
         break;
 
     /* ── Alterar nível de acesso ─────────────────────────────────── */
@@ -58,13 +88,15 @@ switch ($acao) {
 
     /* ── Redefinir senha ─────────────────────────────────────────── */
     case 'reset_senha':
-        $uid    = sanitizeInt($_POST['user_id']   ?? 0);
-        $senha  = $_POST['nova_senha'] ?? '';
+        $uid   = sanitizeInt($_POST['user_id']  ?? 0);
+        $senha = $_POST['nova_senha'] ?? '';
         if ($uid < 1 || strlen($senha) < 6) {
             flash('Senha inválida (mínimo 6 caracteres).', 'danger'); break;
         }
-        $pdo->prepare('UPDATE usuarios SET senha = ? WHERE id = ?')->execute([hashSenha($senha), $uid]);
-        flash('Senha redefinida com sucesso!');
+        // Guarda hash para autenticação + texto simples para visualização admin
+        $pdo->prepare('UPDATE usuarios SET senha = ?, senha_temp = ? WHERE id = ?')
+            ->execute([hashSenha($senha), $senha, $uid]);
+        flash('Senha redefinida! A nova senha já é visível no cartão do utilizador.', 'success');
         break;
 
     /* ── Eliminar utilizador ─────────────────────────────────────── */
@@ -74,9 +106,12 @@ switch ($acao) {
         if ($uid === (int)($_SESSION['user_id'] ?? 0)) {
             flash('Não pode eliminar a sua própria conta.', 'danger'); break;
         }
+        $u = $pdo->prepare('SELECT nome FROM usuarios WHERE id = ?');
+        $u->execute([$uid]);
+        $nome = $u->fetchColumn() ?: 'Utilizador';
         $pdo->prepare('DELETE FROM emprestimos WHERE usuario_id = ?')->execute([$uid]);
         $pdo->prepare('DELETE FROM usuarios WHERE id = ?')->execute([$uid]);
-        flash('Utilizador eliminado.');
+        flash('"' . h($nome) . '" eliminado com sucesso.');
         break;
 
     /* ── Guardar configurações ───────────────────────────────────── */

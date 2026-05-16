@@ -430,38 +430,84 @@ require 'header.php';
         ════════════════════════════════════════════════════════════ -->
         <?php if ($tab === 'usuarios'): ?>
 
+        <style>
+        /* credential box */
+        .cred-box {
+            background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;
+            padding:8px 12px; font-family:monospace; font-size:0.8rem;
+            display:flex; align-items:center; gap:6px;
+        }
+        .cred-val { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#1e293b; }
+        .cred-val.masked { letter-spacing:.15em; color:#94a3b8; }
+        .btn-cred { background:none; border:none; padding:2px 5px; color:#6b7280; cursor:pointer; font-size:0.78rem; }
+        .btn-cred:hover { color:#374151; }
+        .dark-mode .cred-box { background:#1e293b; border-color:#334155; }
+        .dark-mode .cred-val  { color:#e2e8f0; }
+        .dark-mode .cred-val.masked { color:#475569; }
+        .dark-mode .btn-cred  { color:#94a3b8; }
+
+        /* user card row */
+        .u-card {
+            background:#fff; border:1px solid #f1f5f9; border-radius:12px;
+            padding:16px 18px; margin-bottom:10px;
+            transition: box-shadow .15s;
+        }
+        .u-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.07); }
+        .dark-mode .u-card { background:#1f2937; border-color:#374151; }
+
+        /* level pill */
+        .lvl-select {
+            border:1px solid #e2e8f0; border-radius:20px; padding:3px 10px;
+            font-size:0.75rem; font-weight:600; background:#f8fafc; cursor:pointer;
+            appearance:none; -webkit-appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:right 8px center;
+            padding-right:24px;
+        }
+        .dark-mode .lvl-select { background-color:#374151; border-color:#4b5563; color:#f9fafb; }
+        </style>
+
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
-                <h2 style="font-size:1.4rem;font-weight:800;margin:0;">Gestão de Utilizadores</h2>
+                <h2 style="font-size:1.4rem;font-weight:800;margin:0;">Utilizadores &amp; Acessos</h2>
                 <p style="color:#6b7280;font-size:0.85rem;margin:2px 0 0;"><?= $totalUsuarios ?> utilizador<?= $totalUsuarios!=1?'es':'' ?> registado<?= $totalUsuarios!=1?'s':'' ?></p>
             </div>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#formNovoUser">
-                <i class="fas fa-user-plus me-1"></i> Novo Utilizador
-            </button>
+            <div class="d-flex gap-2">
+                <input type="text" id="userSearch" class="form-control form-control-sm"
+                       placeholder="&#128269; Filtrar utilizadores…" style="max-width:200px;">
+                <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#formNovoUser">
+                    <i class="fas fa-user-plus me-1"></i> Novo
+                </button>
+            </div>
         </div>
 
         <!-- Adicionar utilizador -->
         <div class="collapse mb-4" id="formNovoUser">
             <div class="cfg-card">
-                <p class="cfg-section-label"><i class="fas fa-user-plus me-1"></i> Adicionar Utilizador</p>
-                <form method="POST" action="admin_acao.php">
+                <p class="cfg-section-label"><i class="fas fa-user-plus me-1"></i> Criar Novo Utilizador</p>
+                <form method="POST" action="admin_acao.php" id="formCriarUser">
                     <input type="hidden" name="acao" value="novo_usuario">
                     <input type="hidden" name="redirect_tab" value="usuarios">
                     <div class="row g-3">
                         <div class="col-md-3">
                             <label class="form-label">Nome <span style="color:#ef4444;">*</span></label>
-                            <input type="text" name="nome" class="form-control" placeholder="Nome completo" required>
+                            <input type="text" name="nome" id="newNome" class="form-control" placeholder="Nome completo" required>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label">E-mail <span style="color:#ef4444;">*</span></label>
-                            <input type="email" name="email" class="form-control" placeholder="email@exemplo.com" required>
+                            <label class="form-label">E-mail (login) <span style="color:#ef4444;">*</span></label>
+                            <input type="email" name="email" id="newEmail" class="form-control" placeholder="email@exemplo.com" required>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Senha <span style="color:#ef4444;">*</span></label>
-                            <input type="password" name="senha" class="form-control" placeholder="••••••••" required>
+                            <div class="input-group">
+                                <input type="text" name="senha" id="newSenha" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+                                <button type="button" class="btn btn-outline-secondary" onclick="gerarSenha()" title="Gerar senha aleatória">
+                                    <i class="fas fa-shuffle"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label">Nível</label>
+                            <label class="form-label">Nível de Acesso</label>
                             <select name="nivel_acesso" class="form-select">
                                 <option value="usuario">Utilizador</option>
                                 <option value="bibliotecario">Bibliotecário</option>
@@ -469,97 +515,176 @@ require 'header.php';
                             </select>
                         </div>
                         <div class="col-md-1 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save"></i></button>
+                            <button type="submit" class="btn btn-primary w-100" title="Criar utilizador">
+                                <i class="fas fa-save"></i>
+                            </button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Tabela de utilizadores -->
-        <div class="cfg-card p-0" style="overflow:hidden;">
-            <div style="overflow-x:auto;">
-            <table class="table table-hover mb-0 align-middle" style="font-size:0.85rem;">
-                <thead style="background:#f8f9fa;">
-                    <tr>
-                        <th style="padding:12px 16px;">#</th>
-                        <th>Utilizador</th>
-                        <th>E-mail</th>
-                        <th>Nível</th>
-                        <th style="text-align:center;">Acções</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php
-                $avatarColors = ['#3b82f6','#22c55e','#a855f7','#f97316','#ef4444','#14b8a6','#f59e0b','#6366f1'];
-                foreach ($usuarios as $u):
-                    $ini   = mb_strtoupper(mb_substr($u['nome'],0,1,'UTF-8'),'UTF-8');
-                    $cor   = $avatarColors[$u['id'] % count($avatarColors)];
-                    $nivel = $u['nivel_acesso'];
-                    $clsBadge = nivelCssClass($nivel);
-                    $lblBadge = nivelLabel($nivel);
-                    $isSelf   = ($u['id'] == ($_SESSION['user_id'] ?? 0));
-                ?>
-                <tr>
-                    <td style="padding:10px 16px;color:#9ca3af;"><?= $u['id'] ?></td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="user-avatar-sm" style="background:<?= $cor ?>"><?= $ini ?></div>
-                            <strong><?= h($u['nome']) ?></strong>
+        <!-- Cards de utilizadores -->
+        <div id="userList">
+        <?php
+        $avatarColors = ['#3b82f6','#22c55e','#a855f7','#f97316','#ef4444','#14b8a6','#f59e0b','#6366f1'];
+        foreach ($usuarios as $u):
+            $ini      = mb_strtoupper(mb_substr($u['nome'],0,1,'UTF-8'),'UTF-8');
+            $cor      = $avatarColors[$u['id'] % count($avatarColors)];
+            $nivel    = $u['nivel_acesso'];
+            $clsBadge = nivelCssClass($nivel);
+            $lblBadge = nivelLabel($nivel);
+            $isSelf   = ($u['id'] == ($_SESSION['user_id'] ?? 0));
+            $senhaVis = $u['senha_temp'] ?? null;
+            $senhaId  = 'pw_' . $u['id'];
+            $emailEsc = h($u['email']);
+            $nomeEsc  = h($u['nome']);
+            $lvlColors= ['admin'=>'#6366f1','bibliotecario'=>'#22c55e','usuario'=>'#3b82f6'];
+            $lvlColor = $lvlColors[$nivel] ?? '#6b7280';
+        ?>
+        <div class="u-card" data-search="<?= strtolower($nomeEsc . ' ' . $emailEsc . ' ' . $nivel) ?>">
+            <div class="d-flex align-items-start gap-3 flex-wrap">
+
+                <!-- Avatar + nome -->
+                <div class="d-flex align-items-center gap-3" style="min-width:200px;flex:1;">
+                    <div class="user-avatar-sm" style="background:<?= $cor ?>;width:42px;height:42px;font-size:1rem;flex-shrink:0;"><?= $ini ?></div>
+                    <div>
+                        <div style="font-weight:700;font-size:0.92rem;">
+                            <?= $nomeEsc ?>
                             <?php if ($isSelf): ?>
-                            <span style="font-size:0.68rem;background:#eef2ff;color:#6366f1;padding:1px 7px;border-radius:20px;font-weight:700;">Você</span>
+                            <span style="font-size:0.65rem;background:#eef2ff;color:#6366f1;padding:1px 7px;border-radius:20px;font-weight:700;margin-left:4px;">Você</span>
                             <?php endif; ?>
                         </div>
-                    </td>
-                    <td style="color:#6b7280;"><?= h($u['email']) ?></td>
-                    <td><span class="badge-status <?= $clsBadge ?>"><?= $lblBadge ?></span></td>
-                    <td>
-                        <div class="d-flex gap-1 justify-content-center flex-wrap">
-                            <!-- Alterar nível -->
-                            <form method="POST" action="admin_acao.php" class="d-inline">
-                                <input type="hidden" name="acao" value="alterar_nivel">
-                                <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                                <input type="hidden" name="redirect_tab" value="usuarios">
-                                <select name="novo_nivel" class="form-select form-select-sm d-inline-block"
-                                        style="width:auto;font-size:0.76rem;"
-                                        onchange="this.form.submit()"
-                                        <?= $isSelf ? 'disabled title="Não pode alterar o seu próprio nível"' : '' ?>>
-                                    <option value="usuario"       <?= $nivel==='usuario'       ?'selected':'' ?>>Utilizador</option>
-                                    <option value="bibliotecario" <?= $nivel==='bibliotecario' ?'selected':'' ?>>Bibliotecário</option>
-                                    <option value="admin"         <?= $nivel==='admin'         ?'selected':'' ?>>Admin</option>
-                                </select>
-                            </form>
-                            <!-- Reset senha -->
-                            <button class="btn btn-sm btn-outline-secondary"
-                                    style="font-size:0.75rem;"
-                                    onclick="resetSenha(<?= $u['id'] ?>, '<?= h($u['nome']) ?>')"
-                                    title="Redefinir senha">
-                                <i class="fas fa-key"></i>
+                        <div style="font-size:0.78rem;color:#9ca3af;">#<?= $u['id'] ?></div>
+                    </div>
+                </div>
+
+                <!-- Credenciais -->
+                <div style="flex:2;min-width:260px;">
+                    <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-bottom:5px;">
+                        <i class="fas fa-id-card me-1"></i> Credenciais de Acesso
+                    </div>
+                    <!-- email -->
+                    <div class="cred-box mb-1">
+                        <i class="fas fa-at" style="color:#6b7280;width:12px;flex-shrink:0;"></i>
+                        <span class="cred-val" title="E-mail / Login"><?= $emailEsc ?></span>
+                        <button class="btn-cred" onclick="copiarTexto('<?= addslashes($u['email']) ?>', this)" title="Copiar e-mail">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <!-- senha -->
+                    <div class="cred-box">
+                        <i class="fas fa-lock" style="color:#6b7280;width:12px;flex-shrink:0;"></i>
+                        <?php if ($senhaVis): ?>
+                            <span class="cred-val masked" id="<?= $senhaId ?>_mask">••••••••</span>
+                            <span class="cred-val" id="<?= $senhaId ?>_val" style="display:none;"><?= h($senhaVis) ?></span>
+                            <button class="btn-cred" onclick="toggleSenha('<?= $senhaId ?>')" title="Mostrar/ocultar senha" id="<?= $senhaId ?>_btn">
+                                <i class="fas fa-eye"></i>
                             </button>
-                            <!-- Eliminar -->
-                            <?php if (!$isSelf): ?>
-                            <form method="POST" action="admin_acao.php" class="d-inline"
-                                  onsubmit="return confirm('Eliminar o utilizador <?= h(addslashes($u['nome'])) ?>? Esta acção é irreversível.')">
-                                <input type="hidden" name="acao" value="eliminar_usuario">
-                                <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                                <input type="hidden" name="redirect_tab" value="usuarios">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size:0.75rem;" title="Eliminar">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                            <?php endif; ?>
+                            <button class="btn-cred" onclick="copiarTexto('<?= addslashes($senhaVis) ?>', this)" title="Copiar senha">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        <?php else: ?>
+                            <span class="cred-val masked" style="font-size:0.75rem;letter-spacing:0;">Senha encriptada — use "Redefinir" para ver</span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Nível + acções -->
+                <div class="d-flex flex-column align-items-end gap-2" style="min-width:160px;">
+                    <!-- Nível com dropdown directo -->
+                    <form method="POST" action="admin_acao.php" class="d-inline">
+                        <input type="hidden" name="acao" value="alterar_nivel">
+                        <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
+                        <input type="hidden" name="redirect_tab" value="usuarios">
+                        <select name="novo_nivel" class="lvl-select"
+                                style="color:<?= $lvlColor ?>; border-color:<?= $lvlColor ?>40;"
+                                onchange="this.form.submit()"
+                                <?= $isSelf ? 'disabled title="Não pode alterar o seu próprio nível"' : '' ?>>
+                            <option value="usuario"       <?= $nivel==='usuario'       ?'selected':'' ?>>👤 Utilizador</option>
+                            <option value="bibliotecario" <?= $nivel==='bibliotecario' ?'selected':'' ?>>📚 Bibliotecário</option>
+                            <option value="admin"         <?= $nivel==='admin'         ?'selected':'' ?>>🛡 Admin</option>
+                        </select>
+                    </form>
+
+                    <!-- Botões de acção -->
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-sm btn-outline-primary"
+                                onclick="abrirEditar(<?= $u['id'] ?>, '<?= addslashes($nomeEsc) ?>', '<?= addslashes($emailEsc) ?>', '<?= $nivel ?>')"
+                                title="Editar utilizador">
+                            <i class="fas fa-pen"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning"
+                                onclick="abrirReset(<?= $u['id'] ?>, '<?= addslashes($nomeEsc) ?>')"
+                                title="Redefinir senha">
+                            <i class="fas fa-key"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary"
+                                onclick="copiarCredenciais('<?= addslashes($u['email']) ?>', '<?= $senhaVis ? addslashes($senhaVis) : "" ?>')"
+                                title="Copiar credenciais">
+                            <i class="fas fa-id-card"></i>
+                        </button>
+                        <?php if (!$isSelf): ?>
+                        <form method="POST" action="admin_acao.php" class="d-inline"
+                              onsubmit="return confirm('Eliminar <?= addslashes($nomeEsc) ?>? Esta acção é irreversível.')">
+                            <input type="hidden" name="acao" value="eliminar_usuario">
+                            <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
+                            <input type="hidden" name="redirect_tab" value="usuarios">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <?php endforeach; ?>
+        </div><!-- /userList -->
+
+        <!-- ── Modal: Editar Utilizador ────────────────────────────── -->
+        <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-pen me-2" style="color:#3b82f6;"></i>Editar Utilizador</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="POST" action="admin_acao.php">
+                        <input type="hidden" name="acao" value="editar_usuario">
+                        <input type="hidden" name="redirect_tab" value="usuarios">
+                        <input type="hidden" name="user_id" id="editUserId">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Nome completo <span style="color:#ef4444;">*</span></label>
+                                <input type="text" name="nome" id="editNome" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">E-mail (login) <span style="color:#ef4444;">*</span></label>
+                                <input type="email" name="email" id="editEmail" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nível de Acesso</label>
+                                <select name="nivel_acesso" id="editNivel" class="form-select">
+                                    <option value="usuario">👤 Utilizador</option>
+                                    <option value="bibliotecario">📚 Bibliotecário</option>
+                                    <option value="admin">🛡 Administrador</option>
+                                </select>
+                            </div>
                         </div>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-floppy-disk me-1"></i> Guardar</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
-        <!-- Modal reset senha -->
-        <div class="modal fade" id="modalResetSenha" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" style="max-width:380px;">
+        <!-- ── Modal: Redefinir Senha ───────────────────────────────── -->
+        <div class="modal fade" id="modalReset" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title"><i class="fas fa-key me-2" style="color:#f59e0b;"></i>Redefinir Senha</h5>
@@ -570,22 +695,120 @@ require 'header.php';
                         <input type="hidden" name="redirect_tab" value="usuarios">
                         <input type="hidden" name="user_id" id="resetUserId">
                         <div class="modal-body">
-                            <p style="font-size:0.9rem;">Definir nova senha para <strong id="resetUserName"></strong>:</p>
-                            <input type="password" name="nova_senha" class="form-control" placeholder="Nova senha (mínimo 6 caracteres)" minlength="6" required autofocus>
+                            <p style="font-size:0.88rem;color:#6b7280;" class="mb-3">
+                                Nova senha para <strong id="resetUserName" style="color:#111827;"></strong>:
+                            </p>
+                            <div class="input-group">
+                                <input type="text" name="nova_senha" id="resetSenhaInput"
+                                       class="form-control" placeholder="Mínimo 6 caracteres"
+                                       minlength="6" required>
+                                <button type="button" class="btn btn-outline-secondary"
+                                        onclick="gerarSenhaReset()" title="Gerar senha aleatória">
+                                    <i class="fas fa-shuffle"></i>
+                                </button>
+                            </div>
+                            <div class="form-text mt-1">
+                                <i class="fas fa-info-circle me-1"></i>
+                                A nova senha ficará visível no cartão do utilizador.
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-key me-1"></i> Guardar</button>
+                            <button type="submit" class="btn btn-warning btn-sm"><i class="fas fa-key me-1"></i> Guardar Senha</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+
+        <!-- ── Toast de cópia ───────────────────────────────────────── -->
+        <div id="copyToast" style="
+            position:fixed;bottom:24px;right:24px;z-index:9999;
+            background:#1e293b;color:#f8fafc;padding:10px 18px;
+            border-radius:8px;font-size:0.83rem;font-weight:600;
+            opacity:0;transition:opacity .2s;pointer-events:none;
+            display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-circle-check" style="color:#22c55e;"></i>
+            <span id="copyToastMsg">Copiado!</span>
+        </div>
+
         <script>
-        function resetSenha(id, nome) {
+        /* ── Filtro de pesquisa ─────────────────────────────────────── */
+        document.getElementById('userSearch').addEventListener('input', function(){
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('#userList .u-card').forEach(c => {
+                c.style.display = c.dataset.search.includes(q) ? '' : 'none';
+            });
+        });
+
+        /* ── Gerar senha aleatória ──────────────────────────────────── */
+        function gerarSenha() {
+            const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+            let pw = '';
+            for (let i=0;i<10;i++) pw += chars[Math.floor(Math.random()*chars.length)];
+            document.getElementById('newSenha').value = pw;
+        }
+        function gerarSenhaReset() {
+            const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+            let pw = '';
+            for (let i=0;i<10;i++) pw += chars[Math.floor(Math.random()*chars.length)];
+            document.getElementById('resetSenhaInput').value = pw;
+        }
+
+        /* ── Toggle visibilidade da senha ───────────────────────────── */
+        function toggleSenha(id) {
+            const mask = document.getElementById(id+'_mask');
+            const val  = document.getElementById(id+'_val');
+            const btn  = document.getElementById(id+'_btn');
+            const hidden = val.style.display === 'none';
+            mask.style.display = hidden ? 'none' : '';
+            val.style.display  = hidden ? '' : 'none';
+            btn.innerHTML = hidden
+                ? '<i class="fas fa-eye-slash"></i>'
+                : '<i class="fas fa-eye"></i>';
+        }
+
+        /* ── Copiar texto simples ───────────────────────────────────── */
+        function copiarTexto(txt, btn) {
+            navigator.clipboard.writeText(txt).then(() => {
+                mostrarToast('Copiado: ' + txt.substring(0,30) + (txt.length>30?'…':''));
+                const ico = btn.querySelector('i');
+                ico.classList.replace('fa-copy','fa-circle-check');
+                setTimeout(() => ico.classList.replace('fa-circle-check','fa-copy'), 1800);
+            });
+        }
+
+        /* ── Copiar credenciais completas ───────────────────────────── */
+        function copiarCredenciais(email, senha) {
+            const txt = senha
+                ? `Email: ${email}\nSenha: ${senha}`
+                : `Email: ${email}\n(Senha encriptada — redefina para ver)`;
+            navigator.clipboard.writeText(txt).then(() => mostrarToast('Credenciais copiadas!'));
+        }
+
+        /* ── Toast ──────────────────────────────────────────────────── */
+        function mostrarToast(msg) {
+            const t = document.getElementById('copyToast');
+            document.getElementById('copyToastMsg').textContent = msg;
+            t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 2200);
+        }
+
+        /* ── Abrir modal editar ─────────────────────────────────────── */
+        function abrirEditar(id, nome, email, nivel) {
+            document.getElementById('editUserId').value = id;
+            document.getElementById('editNome').value   = nome;
+            document.getElementById('editEmail').value  = email;
+            document.getElementById('editNivel').value  = nivel;
+            new bootstrap.Modal(document.getElementById('modalEditar')).show();
+        }
+
+        /* ── Abrir modal reset ──────────────────────────────────────── */
+        function abrirReset(id, nome) {
             document.getElementById('resetUserId').value = id;
             document.getElementById('resetUserName').textContent = nome;
-            new bootstrap.Modal(document.getElementById('modalResetSenha')).show();
+            document.getElementById('resetSenhaInput').value = '';
+            new bootstrap.Modal(document.getElementById('modalReset')).show();
         }
         </script>
 

@@ -132,11 +132,12 @@ INSERT INTO `solicitacoes_emprestimo` (`id`, `usuario_id`, `livro_id`, `data_sol
 -- Estrutura para tabela `usuarios`
 --
 
-CREATE TABLE `usuarios` (
+CREATE TABLE IF NOT EXISTS `usuarios` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `senha` varchar(255) NOT NULL,
+  `senha_temp` varchar(255) DEFAULT NULL,
   `nivel_acesso` enum('admin','bibliotecario','usuario') DEFAULT 'usuario'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
