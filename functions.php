@@ -38,7 +38,7 @@ function getLivrosPaginados(int $page = 1, int $perPage = 10): array
 {
     global $pdo;
     $offset = ($page - 1) * $perPage;
-    $stmt   = $pdo->prepare('SELECT * FROM livros LIMIT :limit OFFSET :offset');
+    $stmt   = $pdo->prepare('SELECT * FROM livros WHERE ativo = 1 LIMIT :limit OFFSET :offset');
     $stmt->bindValue(':limit',  $perPage, PDO::PARAM_INT);
     $stmt->bindValue(':offset', $offset,  PDO::PARAM_INT);
     $stmt->execute();
@@ -48,7 +48,7 @@ function getLivrosPaginados(int $page = 1, int $perPage = 10): array
 function countLivros(): int
 {
     global $pdo;
-    return (int) $pdo->query('SELECT COUNT(*) FROM livros')->fetchColumn();
+    return (int) $pdo->query('SELECT COUNT(*) FROM livros WHERE ativo = 1')->fetchColumn();
 }
 
 function getUsuariosPaginados(int $page = 1, int $perPage = 10): array

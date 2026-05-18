@@ -90,7 +90,9 @@ function navActive(string $page, string $current): string {
                         <?php
                         $pendLC = 0;
                         if (isset($GLOBALS['pdo'])) {
-                            $pendLC = (int)($GLOBALS['pdo']->query("SELECT COUNT(*) FROM lista_compras WHERE status='pendente'")->fetchColumn() ?? 0);
+                            try {
+                                $pendLC = (int)($GLOBALS['pdo']->query("SELECT COUNT(*) FROM lista_compras WHERE status='pendente'")->fetchColumn() ?? 0);
+                            } catch (\Throwable $e) { $pendLC = 0; }
                         }
                         if ($pendLC > 0): ?>
                         <span class="nav-badge"><?php echo $pendLC; ?></span>

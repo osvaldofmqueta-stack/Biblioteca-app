@@ -11,8 +11,8 @@ $cfg = [];
 foreach ($cfgRows as $r) $cfg[$r['chave']] = $r['valor'];
 
 /* ─── Estatísticas gerais ─────────────────────────────────────────── */
-$totalLivros       = (int)$pdo->query('SELECT COUNT(*) FROM livros')->fetchColumn();
-$totalDisponiveis  = (int)$pdo->query('SELECT COUNT(*) FROM livros WHERE disponivel = 1')->fetchColumn();
+$totalLivros       = (int)$pdo->query('SELECT COUNT(*) FROM livros WHERE ativo = 1')->fetchColumn();
+$totalDisponiveis  = (int)$pdo->query('SELECT COUNT(*) FROM livros WHERE disponivel = 1 AND ativo = 1')->fetchColumn();
 $totalUsuarios     = (int)$pdo->query('SELECT COUNT(*) FROM usuarios')->fetchColumn();
 $totalAdmins       = (int)$pdo->query("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso='admin'")->fetchColumn();
 $totalBiblio       = (int)$pdo->query("SELECT COUNT(*) FROM usuarios WHERE nivel_acesso='bibliotecario'")->fetchColumn();

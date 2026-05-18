@@ -1,6 +1,23 @@
 <?php
 declare(strict_types=1);
 
+// ── Suprimir erros na produção — não expõe detalhes internos ao utilizador ───
+if (!defined('APP_DEBUG')) {
+    define('APP_DEBUG', false); // mudar para true apenas em desenvolvimento
+}
+if (!APP_DEBUG) {
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
+} else {
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+}
+
+// ── Fuso horário (Angola = Africa/Luanda = UTC+1) ─────────────────────────────
+date_default_timezone_set('Africa/Luanda');
+
 // ── Detecção automática do caminho base ───────────────────────────────────────
 // Funciona em qualquer sub-pasta: htdocs/, htdocs/biblioteca/, www/, etc.
 if (!defined('BASE_URL')) {

@@ -21,8 +21,8 @@ $estado  = in_array($_GET['estado'] ?? '', ['', 'disponivel', 'indisponivel'], s
            ? ($_GET['estado'] ?? '')
            : '';
 
-// Query dinâmica
-$where  = ['1=1'];
+// Query dinâmica — só mostra livros activos
+$where  = ['ativo = 1'];
 $params = [];
 
 if ($titulo !== '') {
