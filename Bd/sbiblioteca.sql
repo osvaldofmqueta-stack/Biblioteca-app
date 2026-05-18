@@ -146,13 +146,13 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 --
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `nivel_acesso`) VALUES
-(5, 'Admin', 'admin@example.com', 'senha123', 'admin'),
-(6, 'Bibliot', 'bibliot@example.com', 'senha1234', 'bibliotecario'),
-(7, 'User', 'user@example.com', 'senha12345', 'usuario'),
-(8, 'Mario Cambambe', 'mario@gmail.com', 'MARIO', 'usuario'),
+(5, 'Admin', 'admin@example.com', 'admin123', 'admin'),
+(6, 'Bibliot', 'bibliot@example.com', 'biblio123', 'bibliotecario'),
+(7, 'User', 'user@example.com', 'user123', 'usuario'),
+(8, 'Mario Cambambe', 'mario@gmail.com', 'mario123', 'usuario'),
 (9, 'Edson André ', 'edson@example.com', 'edson123', 'bibliotecario'),
 (10, 'Professora Marliés', 'Marlis@example.com', 'senha123', 'admin'),
-(11, 'Hélio Caldeira', 'helio@example.com', '$2y$10$VTEAZLtcawpBDQOs8.HoqOgXjUcFWgktkpgMG5W9ZJpgqSyRVMCae', 'admin');
+(11, 'Hélio Caldeira', 'helio@example.com', '$2y$12$9q1P/asVH.BXMW5Cmt6iIO2GHH7D7NM7OTHi4xQv7UJH0wgIejYnO', 'admin');
 
 --
 -- Índices para tabelas despejadas
