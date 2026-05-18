@@ -5,6 +5,11 @@ require_once __DIR__ . '/auth.php';
 redirectIfNotLoggedIn();
 require_once __DIR__ . '/functions.php';
 
+/* ── Helper flash ────────────────────────────────────────────────────────── */
+function flashLivro(string $msg, string $tipo = 'success'): void {
+    $_SESSION['livro_flash'] = ['msg' => $msg, 'tipo' => $tipo];
+}
+
 /* ── Adicionar livro individual ──────────────────────────────────────────── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_livro']) && isBibliotecario()) {
     $titulo      = sanitizeInput($_POST['titulo']          ?? '');
@@ -14,8 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adicionar_livro']) &&
     if ($titulo && $autor && $ano > 0) {
         $pdo->prepare('INSERT INTO livros (titulo, autor, ano_publicacao, localizacao) VALUES (?, ?, ?, ?)')
             ->execute([$titulo, $autor, $ano, $localizacao ?: null]);
-        header('Location: livros.php'); exit();
+        flashLivro('Livro "' . h($titulo) . '" adicionado com sucesso!', 'success');
+    } else {
+        flashLivro('Preencha o título, autor e ano correctamente.', 'danger');
     }
+    header('Location: livros.php'); exit();
 }
 
 /* ── Registar em massa ───────────────────────────────────────────────────── */
@@ -40,16 +48,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['registar_massa']) && 
             $inseridos++;
         }
     }
-    header('Location: livros.php?massa=' . $inseridos); exit();
+    if ($inseridos > 0) {
+        flashLivro($inseridos . ' livro' . ($inseridos != 1 ? 's' : '') . ' registado' . ($inseridos != 1 ? 's' : '') . ' com sucesso!', 'success');
+    } else {
+        flashLivro('Nenhum livro foi registado. Verifique os campos obrigatórios.', 'warning');
+    }
+    header('Location: livros.php'); exit();
 }
 
 /* ── Eliminar livro ──────────────────────────────────────────────────────── */
 if (isset($_GET['excluir']) && isBibliotecario()) {
     $id = intval($_GET['excluir']);
+    $livroNome = $pdo->prepare('SELECT titulo FROM livros WHERE id = ?');
+    $livroNome->execute([$id]);
+    $titulo = $livroNome->fetchColumn() ?: 'Livro';
     $pdo->prepare('DELETE FROM emprestimos WHERE livro_id = ?')->execute([$id]);
     $pdo->prepare('DELETE FROM livros WHERE id = ?')->execute([$id]);
+    flashLivro('"' . h($titulo) . '" eliminado com sucesso.', 'warning');
     header('Location: livros.php'); exit();
 }
+
+/* ── Ler flash da sessão ─────────────────────────────────────────────────── */
+$flash = $_SESSION['livro_flash'] ?? null;
+unset($_SESSION['livro_flash']);
 
 $livrosPorPagina = 30;
 $page   = max(1, intval($_GET['page'] ?? 1));
@@ -68,8 +89,6 @@ $paleta = [
     '#14b8a6','#f59e0b','#ec4899','#6366f1','#0ea5e9',
     '#84cc16','#e11d48','#7c3aed','#059669','#d97706',
 ];
-
-$msgMassa = isset($_GET['massa']) ? (int)$_GET['massa'] : 0;
 
 require 'header.php';
 ?>
@@ -127,18 +146,13 @@ require 'header.php';
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddLivro">
                 <i class="fas fa-plus"></i> Adicionar
             </button>
-            <button class="btn btn-sm" style="background:#6366f1;color:#fff;border:none;" data-bs-toggle="collapse" data-bs-target="#formMassa">
+            <button class="btn btn-sm" style="background:#6366f1;color:#fff;border:none;"
+                    data-bs-toggle="modal" data-bs-target="#modalEmMassa">
                 <i class="fas fa-layer-group"></i> Em Massa
             </button>
             <?php endif; ?>
         </div>
     </div>
-
-    <?php if ($msgMassa > 0): ?>
-    <div class="alert alert-success d-flex align-items-center gap-2 mb-3" style="border-radius:10px;">
-        <i class="fas fa-circle-check"></i> <?php echo $msgMassa; ?> livro<?php echo $msgMassa != 1 ? 's' : ''; ?> registado<?php echo $msgMassa != 1 ? 's' : ''; ?> com sucesso!
-    </div>
-    <?php endif; ?>
 
     <!-- Modal: Adicionar Livro -->
     <?php if (isBibliotecario()): ?>
@@ -195,50 +209,59 @@ require 'header.php';
         </div>
     </div>
 
-    <!-- Formulário: Registar em Massa -->
-    <div class="collapse mb-4" id="formMassa">
-        <div class="card">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <span><i class="fas fa-layer-group me-1" style="color:#6366f1;"></i> Registar Livros em Massa</span>
-                <small class="text-muted">Preencha várias linhas — o campo <strong>Qtd.</strong> cria cópias do mesmo título.</small>
-            </div>
-            <div class="card-body p-0">
+    <!-- Modal: Registar em Massa -->
+    <div class="modal fade" id="modalEmMassa" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:12px 12px 0 0;">
+                    <h5 class="modal-title fw-bold">
+                        <i class="fas fa-layer-group me-2"></i>Registar Livros em Massa
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
                 <form method="POST" id="formMassaForm">
-                    <div class="table-responsive">
-                        <table class="table table-sm mb-0 align-middle" id="massaTable">
-                            <thead style="background:#f8f9fa;">
-                                <tr>
-                                    <th style="width:28%;">Título <span style="color:#ef4444;">*</span></th>
-                                    <th style="width:22%;">Autor <span style="color:#ef4444;">*</span></th>
-                                    <th style="width:10%;">Ano <span style="color:#ef4444;">*</span></th>
-                                    <th style="width:22%;">Localização</th>
-                                    <th style="width:8%;">Qtd.</th>
-                                    <th style="width:10%;"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="massaBody">
-                                <?php for ($r = 0; $r < 3; $r++): ?>
-                                <tr class="massa-row">
-                                    <td><input type="text"   class="form-control form-control-sm" name="m_titulo[]"      placeholder="Título do livro"></td>
-                                    <td><input type="text"   class="form-control form-control-sm" name="m_autor[]"       placeholder="Autor"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="m_ano[]"         placeholder="<?php echo date('Y'); ?>" min="1000" max="<?php echo date('Y')+1; ?>"></td>
-                                    <td><input type="text"   class="form-control form-control-sm" name="m_localizacao[]" placeholder="Ex: Estante B-1"></td>
-                                    <td><input type="number" class="form-control form-control-sm" name="m_quantidade[]"  value="1" min="1" max="999" style="width:60px;"></td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remover-linha" title="Remover linha">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <?php endfor; ?>
-                            </tbody>
-                        </table>
+                    <div class="modal-body p-0">
+                        <div class="px-3 py-2" style="background:#f8f9fc;border-bottom:1px solid #e5e7eb;font-size:0.8rem;color:#6b7280;">
+                            <i class="fas fa-circle-info me-1 text-primary"></i>
+                            Preencha várias linhas — o campo <strong>Qtd.</strong> cria cópias do mesmo título.
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm mb-0 align-middle" id="massaTable">
+                                <thead style="background:#f1f5f9;">
+                                    <tr>
+                                        <th style="width:30%;padding-left:12px;">Título <span style="color:#ef4444;">*</span></th>
+                                        <th style="width:22%;">Autor <span style="color:#ef4444;">*</span></th>
+                                        <th style="width:9%;">Ano <span style="color:#ef4444;">*</span></th>
+                                        <th style="width:22%;">Localização</th>
+                                        <th style="width:7%;">Qtd.</th>
+                                        <th style="width:10%;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="massaBody">
+                                    <?php for ($r = 0; $r < 3; $r++): ?>
+                                    <tr class="massa-row">
+                                        <td style="padding-left:12px;"><input type="text"   class="form-control form-control-sm" name="m_titulo[]"      placeholder="Título do livro"></td>
+                                        <td><input type="text"   class="form-control form-control-sm" name="m_autor[]"       placeholder="Autor"></td>
+                                        <td><input type="number" class="form-control form-control-sm" name="m_ano[]"         placeholder="<?php echo date('Y'); ?>" min="1000" max="<?php echo date('Y')+1; ?>"></td>
+                                        <td><input type="text"   class="form-control form-control-sm" name="m_localizacao[]" placeholder="Ex: Estante B-1"></td>
+                                        <td><input type="number" class="form-control form-control-sm" name="m_quantidade[]"  value="1" min="1" max="999"></td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-remover-linha" title="Remover linha">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <?php endfor; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center gap-2 p-3 border-top">
-                        <button type="button" id="btnAddLinha" class="btn btn-sm btn-outline-secondary">
+                    <div class="modal-footer d-flex align-items-center">
+                        <button type="button" id="btnAddLinha" class="btn btn-sm btn-outline-secondary me-auto">
                             <i class="fas fa-plus me-1"></i> Adicionar Linha
                         </button>
-                        <button type="submit" name="registar_massa" class="btn btn-sm ms-auto" style="background:#6366f1;color:#fff;border:none;">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" name="registar_massa" class="btn btn-sm" style="background:#6366f1;color:#fff;border:none;">
                             <i class="fas fa-floppy-disk me-1"></i> Guardar Todos
                         </button>
                     </div>
@@ -475,11 +498,11 @@ document.getElementById('btnAddLinha')?.addEventListener('click', function () {
     const tr = document.createElement('tr');
     tr.className = 'massa-row';
     tr.innerHTML = `
-        <td><input type="text"   class="form-control form-control-sm" name="m_titulo[]"      placeholder="Título do livro"></td>
+        <td style="padding-left:12px;"><input type="text"   class="form-control form-control-sm" name="m_titulo[]"      placeholder="Título do livro"></td>
         <td><input type="text"   class="form-control form-control-sm" name="m_autor[]"       placeholder="Autor"></td>
         <td><input type="number" class="form-control form-control-sm" name="m_ano[]"         placeholder="${anoAtual}" min="1000" max="${anoAtual+1}"></td>
         <td><input type="text"   class="form-control form-control-sm" name="m_localizacao[]" placeholder="Ex: Estante B-1"></td>
-        <td><input type="number" class="form-control form-control-sm" name="m_quantidade[]"  value="1" min="1" max="999" style="width:60px;"></td>
+        <td><input type="number" class="form-control form-control-sm" name="m_quantidade[]"  value="1" min="1" max="999"></td>
         <td class="text-center">
             <button type="button" class="btn btn-sm btn-outline-danger btn-remover-linha" title="Remover linha">
                 <i class="fas fa-minus"></i>
@@ -487,6 +510,46 @@ document.getElementById('btnAddLinha')?.addEventListener('click', function () {
         </td>`;
     tbody.appendChild(tr);
 });
+
+/* ── Toast de feedback ──────────────────────────────────────────────────── */
+(function () {
+    const flashMsg  = <?php echo json_encode($flash['msg']  ?? null); ?>;
+    const flashTipo = <?php echo json_encode($flash['tipo'] ?? 'success'); ?>;
+    if (!flashMsg) return;
+
+    const icons = { success: 'fa-circle-check', danger: 'fa-circle-xmark', warning: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+    const colors = { success: '#22c55e', danger: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+    const labels = { success: 'Sucesso', danger: 'Erro', warning: 'Atenção', info: 'Info' };
+
+    const icon  = icons[flashTipo]  || icons.info;
+    const color = colors[flashTipo] || colors.info;
+    const label = labels[flashTipo] || 'Info';
+
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;min-width:300px;max-width:420px;';
+    container.innerHTML = `
+        <div style="background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.15);
+                    border-left:4px solid ${color};padding:14px 18px;display:flex;align-items:flex-start;gap:12px;
+                    animation:slideInToast .3s ease;">
+            <i class="fas ${icon}" style="color:${color};font-size:1.2rem;margin-top:1px;flex-shrink:0;"></i>
+            <div style="flex:1;">
+                <div style="font-weight:700;font-size:0.85rem;color:#111;">${label}</div>
+                <div style="font-size:0.82rem;color:#555;margin-top:2px;">${flashMsg}</div>
+            </div>
+            <button onclick="this.closest('div[style]').remove()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:1rem;padding:0;line-height:1;">&#x2715;</button>
+        </div>`;
+
+    if (!document.querySelector('#toastStyle')) {
+        const s = document.createElement('style');
+        s.id = 'toastStyle';
+        s.textContent = '@keyframes slideInToast{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}';
+        document.head.appendChild(s);
+    }
+    document.body.appendChild(container);
+    setTimeout(() => container.style.opacity = '0', 4500);
+    setTimeout(() => container.remove(), 5000);
+    container.style.transition = 'opacity .5s';
+})();
 
 document.getElementById('massaBody')?.addEventListener('click', function (e) {
     const btn = e.target.closest('.btn-remover-linha');

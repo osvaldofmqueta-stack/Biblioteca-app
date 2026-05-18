@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editar_livro'])) {
     } else {
         $pdo->prepare('UPDATE livros SET titulo = ?, autor = ?, ano_publicacao = ?, localizacao = ? WHERE id = ?')
             ->execute([$titulo, $autor, $ano, $localizacao ?: null, $id]);
+        $_SESSION['livro_flash'] = ['msg' => 'Livro "' . htmlspecialchars($titulo, ENT_QUOTES) . '" actualizado com sucesso!', 'tipo' => 'success'];
         header('Location: livros.php');
         exit();
     }
