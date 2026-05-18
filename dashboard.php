@@ -26,11 +26,13 @@ $stmt6 = $pdo->query("
     ORDER BY mes ASC
 ");
 $raw6 = $stmt6->fetchAll(PDO::FETCH_ASSOC);
+$mesesAbrev   = ['01'=>'Jan','02'=>'Fev','03'=>'Mar','04'=>'Abr','05'=>'Mai','06'=>'Jun','07'=>'Jul','08'=>'Ago','09'=>'Set','10'=>'Out','11'=>'Nov','12'=>'Dez'];
 $mesesLabels  = [];
 $mesesTotais  = [];
 for ($i = 5; $i >= 0; $i--) {
-    $key   = date('Y-m', strtotime("-$i months"));
-    $label = strftime('%b/%y', strtotime("$key-01")) ?: date('m/y', strtotime("$key-01"));
+    $key    = date('Y-m', strtotime("-$i months"));
+    $partes = explode('-', $key);
+    $label  = ($mesesAbrev[$partes[1]] ?? $partes[1]) . '/' . substr($partes[0], 2);
     $mesesLabels[] = $label;
     $found = 0;
     foreach ($raw6 as $r) { if ($r['mes'] === $key) { $found = (int)$r['total']; break; } }
