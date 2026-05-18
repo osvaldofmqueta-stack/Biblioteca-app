@@ -43,76 +43,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
+
         body {
             margin: 0;
             min-height: 100vh;
             display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #f0f2f5;
+            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+            padding: 1.5rem;
         }
 
-        /* Left panel */
-        .login-brand {
-            flex: 1;
-            background: linear-gradient(145deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+        /* Partículas decorativas de fundo */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(59,130,246,0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(99,102,241,0.10) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Modal card */
+        .login-modal {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.35), 0 8px 20px rgba(0,0,0,0.2);
+            padding: 2.75rem 2.5rem 2.25rem;
+            animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)   scale(1); }
+        }
+
+        /* Logo + cabeçalho */
+        .modal-header-brand {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 4rem 3.5rem;
-            color: #fff;
-        }
-        .login-brand .brand-icon {
-            width: 64px; height: 64px;
-            background: rgba(79,142,247,0.18);
-            border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; color: #4f8ef7;
+            align-items: center;
+            text-align: center;
             margin-bottom: 2rem;
         }
-        .login-brand h1 {
-            font-size: 2rem; font-weight: 700;
-            margin: 0 0 0.75rem;
-            line-height: 1.2;
+        .modal-header-brand img {
+            width: 72px; height: 72px;
+            object-fit: contain;
+            border-radius: 50%;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+            margin-bottom: 1rem;
         }
-        .login-brand p {
-            color: rgba(255,255,255,0.55);
-            font-size: 0.95rem; margin: 0;
-            max-width: 340px; line-height: 1.6;
+        .modal-header-brand h2 {
+            font-size: 1.4rem; font-weight: 700;
+            color: #1a1a2e; margin: 0 0 4px;
         }
-        .login-brand .feature-list {
-            margin-top: 2.5rem; list-style: none; padding: 0;
-        }
-        .login-brand .feature-list li {
-            display: flex; align-items: center; gap: 10px;
-            color: rgba(255,255,255,0.65); font-size: 0.88rem;
-            margin-bottom: 0.75rem;
-        }
-        .login-brand .feature-list li i {
-            color: #4f8ef7; width: 16px;
+        .modal-header-brand .subtitle {
+            color: #6b7280; font-size: 0.84rem; margin: 0;
         }
 
-        /* Right panel */
-        .login-form-panel {
-            width: 420px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 3rem 2.5rem;
-            background: #fff;
-            box-shadow: -4px 0 30px rgba(0,0,0,0.08);
-        }
-        .login-form-panel h2 {
-            font-size: 1.5rem; font-weight: 700;
-            color: #1a1a2e; margin: 0 0 6px;
-        }
-        .login-form-panel .subtitle {
-            color: #6b7280; font-size: 0.88rem; margin-bottom: 2rem;
+        /* Divisor */
+        .modal-divider {
+            border: none;
+            border-top: 1.5px solid #f1f5f9;
+            margin: 0 0 1.75rem;
         }
 
         .form-label {
             font-size: 0.82rem; font-weight: 600;
             color: #374151; margin-bottom: 5px;
+            display: block;
         }
         .input-wrap {
             position: relative; margin-bottom: 1.1rem;
@@ -144,10 +148,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             border: none; border-radius: 10px;
             font-size: 0.95rem; font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
             margin-top: 0.5rem;
+            box-shadow: 0 4px 14px rgba(59,130,246,0.35);
         }
-        .btn-login:hover { background: #2563eb; }
+        .btn-login:hover { background: #2563eb; box-shadow: 0 6px 18px rgba(59,130,246,0.45); }
         .btn-login:active { transform: scale(0.99); }
 
         .error-box {
@@ -176,77 +181,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .error-box .err-msg   { font-size: 0.8rem; color: #b91c1c; margin-top: 1px; }
 
         .login-footer {
-            margin-top: 2rem;
-            color: #9ca3af; font-size: 0.78rem; text-align: center;
+            margin-top: 1.5rem;
+            color: #9ca3af; font-size: 0.75rem; text-align: center;
         }
 
-        /* Tablet: painel esquerdo mais estreito */
-        @media (max-width: 960px) and (min-width: 769px) {
-            .login-brand { min-width: 260px; padding: 2rem 1.5rem; }
-            .login-brand img { width: 90px; height: 90px; }
-            .login-brand h1 { font-size: 1.5rem; }
-            .login-form-panel { padding: 2.5rem 2rem; }
-        }
-
-        /* Mobile: painel esquerdo some, formulário ocupa tudo */
-        @media (max-width: 768px) {
-            body { background: #f0f2f5; min-height: 100vh; align-items: flex-start; padding: 0; }
-            .login-wrapper {
-                flex-direction: column;
-                min-height: 100vh;
-                border-radius: 0;
-                box-shadow: none;
-                max-width: 100%;
-                width: 100%;
-            }
-            .login-brand { display: none !important; }
-            .login-form-panel {
-                width: 100%;
-                max-width: 480px;
-                margin: auto;
-                border-radius: 16px;
-                box-shadow: 0 4px 24px rgba(0,0,0,0.10);
-                padding: 2rem 1.5rem 2.5rem;
-                min-height: unset;
-            }
-            .login-form-panel h2 { font-size: 1.4rem; }
-            .login-form-panel .subtitle { font-size: 0.83rem; }
-            body { padding: 1.5rem 1rem; align-items: center; }
-        }
-
-        /* Mobile pequeno */
-        @media (max-width: 420px) {
-            body { padding: 1rem 0.5rem; }
-            .login-form-panel { padding: 1.5rem 1.1rem 2rem; border-radius: 12px; }
-            .login-form-panel h2 { font-size: 1.25rem; }
-            .input-wrap input, .btn-login { font-size: 0.9rem; }
+        @media (max-width: 480px) {
+            body { padding: 1rem; }
+            .login-modal { padding: 2rem 1.5rem 1.75rem; border-radius: 16px; }
+            .modal-header-brand h2 { font-size: 1.25rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Painel esquerdo -->
-    <div class="login-brand d-none d-md-flex">
-        <img src="<?= BASE_URL ?>/images/ispcan.png" alt="Brasão ISPCAN"
-             style="width:120px;height:120px;object-fit:contain;border-radius:50%;
-                    box-shadow:0 4px 24px rgba(0,0,0,0.35);margin-bottom:1.75rem;">
-        <h1>Sistema de<br>Biblioteca</h1>
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.45);letter-spacing:.3px;margin-bottom:.4rem;">
-            Instituto Superior Politécnico<br>Cardeal do Nascimento — ISPCAN
-        </p>
-        <p>Plataforma de gestão de livros, empréstimos e utilizadores de forma simples e eficiente.</p>
-        <ul class="feature-list">
-            <li><i class="fas fa-check-circle"></i> Gestão completa de livros</li>
-            <li><i class="fas fa-check-circle"></i> Controlo de empréstimos e devoluções</li>
-            <li><i class="fas fa-check-circle"></i> Relatórios e estatísticas</li>
-            <li><i class="fas fa-check-circle"></i> Múltiplos níveis de acesso</li>
-        </ul>
-    </div>
+    <!-- Modal de login centrado -->
+    <div class="login-modal">
 
-    <!-- Painel direito (formulário) -->
-    <div class="login-form-panel">
-        <h2>Bem-vindo de volta</h2>
-        <p class="subtitle">Inicie sessão para aceder ao sistema</p>
+        <!-- Cabeçalho com logo -->
+        <div class="modal-header-brand">
+            <img src="<?= BASE_URL ?>/images/ispcan.png" alt="Brasão ISPCAN">
+            <h2>Bem-vindo de volta</h2>
+            <p class="subtitle">Inicie sessão para aceder ao sistema</p>
+        </div>
+
+        <hr class="modal-divider">
 
         <?php if ($error): ?>
         <div class="error-box">
@@ -412,10 +370,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
 
-        <div class="login-footer" style="margin-top:1.2rem;">
+        <div class="login-footer">
             &copy; <?php echo date('Y'); ?> Sistema de Biblioteca. Todos os direitos reservados.
         </div>
-    </div>
+
+    </div><!-- /.login-modal -->
 
     <script>
     function preencherLogin(email, senha) {
