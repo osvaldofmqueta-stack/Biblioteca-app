@@ -124,7 +124,7 @@ require 'header.php';
                 <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="&#128269; Pesquisar livros…" style="max-width:240px;">
             </div>
             <?php if (isBibliotecario()): ?>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#formAddLivro">
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAddLivro">
                 <i class="fas fa-plus"></i> Adicionar
             </button>
             <button class="btn btn-sm" style="background:#6366f1;color:#fff;border:none;" data-bs-toggle="collapse" data-bs-target="#formMassa">
@@ -140,35 +140,55 @@ require 'header.php';
     </div>
     <?php endif; ?>
 
-    <!-- Formulário: Adicionar um livro -->
+    <!-- Modal: Adicionar Livro -->
     <?php if (isBibliotecario()): ?>
-    <div class="collapse mb-3" id="formAddLivro">
-        <div class="card">
-            <div class="card-header"><i class="fas fa-plus-circle me-1"></i> Novo Livro</div>
-            <div class="card-body">
+    <div class="modal fade" id="modalAddLivro" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:500px;">
+            <div class="modal-content">
+                <div class="modal-header" style="background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-radius:12px 12px 0 0;">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-book-medical me-2"></i>Novo Livro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
                 <form method="POST">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Título</label>
-                            <input type="text" class="form-control" name="titulo" placeholder="Título do livro" required>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Título <span style="color:#ef4444;">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-book text-muted"></i></span>
+                                <input type="text" class="form-control" name="titulo" placeholder="Título do livro" required autofocus>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Autor</label>
-                            <input type="text" class="form-control" name="autor" placeholder="Nome do autor" required>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Autor <span style="color:#ef4444;">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user-pen text-muted"></i></span>
+                                <input type="text" class="form-control" name="autor" placeholder="Nome do autor" required>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Ano</label>
-                            <input type="number" class="form-control" name="ano_publicacao" placeholder="<?php echo date('Y'); ?>" required>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Ano de Publicação <span style="color:#ef4444;">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar text-muted"></i></span>
+                                    <input type="number" class="form-control" name="ano_publicacao"
+                                           placeholder="<?php echo date('Y'); ?>"
+                                           min="1000" max="<?php echo date('Y') + 1; ?>" required>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label fw-semibold">Localização</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-location-dot text-muted"></i></span>
+                                    <input type="text" class="form-control" name="localizacao" placeholder="Ex: Estante A-2">
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Localização</label>
-                            <input type="text" class="form-control" name="localizacao" placeholder="Ex: Estante A-2">
-                        </div>
-                        <div class="col-md-1 d-flex align-items-end">
-                            <button type="submit" name="adicionar_livro" class="btn btn-primary w-100" title="Guardar">
-                                <i class="fas fa-save"></i>
-                            </button>
-                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" name="adicionar_livro" class="btn btn-primary btn-sm">
+                            <i class="fas fa-floppy-disk me-1"></i> Guardar Livro
+                        </button>
                     </div>
                 </form>
             </div>
@@ -320,9 +340,10 @@ require 'header.php';
             </div>
             <?php if (isBibliotecario()): ?>
             <div class="modal-footer pt-0 gap-2">
-                <a id="btnEditar" href="#" class="btn btn-sm btn-outline-primary flex-fill">
+                <button id="btnEditar" type="button" class="btn btn-sm btn-outline-primary flex-fill"
+                        onclick="abrirEditarLivro()">
                     <i class="fas fa-pen me-1"></i> Editar
-                </a>
+                </button>
                 <a id="btnExcluir" href="#" class="btn btn-sm btn-outline-danger flex-fill"
                    onclick="return confirm('Eliminar este livro e todos os seus empréstimos?');">
                     <i class="fas fa-trash me-1"></i> Eliminar
@@ -333,8 +354,81 @@ require 'header.php';
     </div>
 </div>
 
+<!-- ===== MODAL DE EDITAR LIVRO ===== -->
+<?php if (isBibliotecario()): ?>
+<div class="modal fade" id="editarLivroModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:500px;">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;border-radius:12px 12px 0 0;">
+                <h5 class="modal-title fw-bold"><i class="fas fa-pen me-2"></i>Editar Livro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="editar_livro.php" id="formEditarLivro">
+                <input type="hidden" name="editar_livro" value="1">
+                <input type="hidden" name="_livro_id" id="editLivroId">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Título <span style="color:#ef4444;">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-book text-muted"></i></span>
+                            <input type="text" class="form-control" name="titulo" id="editLivroTitulo" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Autor <span style="color:#ef4444;">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user-pen text-muted"></i></span>
+                            <input type="text" class="form-control" name="autor" id="editLivroAutor" required>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Ano <span style="color:#ef4444;">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar text-muted"></i></span>
+                                <input type="number" class="form-control" name="ano_publicacao" id="editLivroAno"
+                                       min="1000" max="<?php echo date('Y') + 1; ?>" required>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Localização</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-location-dot text-muted"></i></span>
+                                <input type="text" class="form-control" name="localizacao" id="editLivroLoc" placeholder="Ex: Estante A-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning btn-sm text-white">
+                        <i class="fas fa-floppy-disk me-1"></i> Guardar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <script>
+// Estado actual do livro aberto no modal de detalhes
+let _livroAtual = {};
+
+function abrirEditarLivro() {
+    const l = _livroAtual;
+    document.getElementById('editLivroId').value    = l.id;
+    document.getElementById('editLivroTitulo').value = l.titulo;
+    document.getElementById('editLivroAutor').value  = l.autor;
+    document.getElementById('editLivroAno').value    = l.ano;
+    document.getElementById('editLivroLoc').value    = l.localizacao || '';
+    document.getElementById('formEditarLivro').action = 'editar_livro.php?id=' + l.id;
+    bootstrap.Modal.getInstance(document.getElementById('bookModal'))?.hide();
+    setTimeout(() => new bootstrap.Modal(document.getElementById('editarLivroModal')).show(), 300);
+}
+
 function openBook(id, titulo, autor, ano, cor, letra, disponivel, localizacao) {
+    _livroAtual = { id, titulo, autor, ano, cor, letra, disponivel, localizacao };
     document.getElementById('modalCover').style.background =
         'linear-gradient(135deg, ' + cor + ' 0%, ' + cor + 'aa 100%)';
     document.getElementById('modalBig').style.background =
@@ -360,9 +454,7 @@ function openBook(id, titulo, autor, ano, cor, letra, disponivel, localizacao) {
         estadoEl.innerHTML = '<span class="badge-status badge-indisponivel"><i class="fas fa-circle-xmark me-1"></i>Emprestado</span>';
     }
 
-    const btnEditar  = document.getElementById('btnEditar');
     const btnExcluir = document.getElementById('btnExcluir');
-    if (btnEditar)  btnEditar.href  = 'editar_livro.php?id=' + id;
     if (btnExcluir) btnExcluir.href = 'livros.php?excluir=' + id;
 
     new bootstrap.Modal(document.getElementById('bookModal'), { backdrop: true }).show();
