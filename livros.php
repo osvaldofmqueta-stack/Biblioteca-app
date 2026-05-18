@@ -229,10 +229,10 @@ require 'header.php';
                             <table class="table table-sm mb-0 align-middle" id="massaTable">
                                 <thead style="background:#f1f5f9;">
                                     <tr>
-                                        <th style="width:30%;padding-left:12px;">Título <span style="color:#ef4444;">*</span></th>
-                                        <th style="width:22%;">Autor <span style="color:#ef4444;">*</span></th>
-                                        <th style="width:9%;">Ano <span style="color:#ef4444;">*</span></th>
-                                        <th style="width:22%;">Localização</th>
+                                        <th style="width:29%;padding-left:12px;">Título <span style="color:#ef4444;">*</span></th>
+                                        <th style="width:21%;">Autor <span style="color:#ef4444;">*</span></th>
+                                        <th style="width:12%;">Ano <span style="color:#ef4444;">*</span></th>
+                                        <th style="width:21%;">Localização</th>
                                         <th style="width:7%;">Qtd.</th>
                                         <th style="width:10%;"></th>
                                     </tr>
@@ -242,7 +242,7 @@ require 'header.php';
                                     <tr class="massa-row">
                                         <td style="padding-left:12px;"><input type="text"   class="form-control form-control-sm" name="m_titulo[]"      placeholder="Título do livro"></td>
                                         <td><input type="text"   class="form-control form-control-sm" name="m_autor[]"       placeholder="Autor"></td>
-                                        <td><input type="number" class="form-control form-control-sm" name="m_ano[]"         placeholder="<?php echo date('Y'); ?>" min="1000" max="<?php echo date('Y')+1; ?>"></td>
+                                        <td><input type="number" class="form-control form-control-sm" name="m_ano[]" placeholder="<?php echo date('Y'); ?>" min="1000" max="<?php echo date('Y')+1; ?>" style="min-width:88px;"></td>
                                         <td><input type="text"   class="form-control form-control-sm" name="m_localizacao[]" placeholder="Ex: Estante B-1"></td>
                                         <td><input type="number" class="form-control form-control-sm" name="m_quantidade[]"  value="1" min="1" max="999"></td>
                                         <td class="text-center">
@@ -500,7 +500,7 @@ document.getElementById('btnAddLinha')?.addEventListener('click', function () {
     tr.innerHTML = `
         <td style="padding-left:12px;"><input type="text"   class="form-control form-control-sm" name="m_titulo[]"      placeholder="Título do livro"></td>
         <td><input type="text"   class="form-control form-control-sm" name="m_autor[]"       placeholder="Autor"></td>
-        <td><input type="number" class="form-control form-control-sm" name="m_ano[]"         placeholder="${anoAtual}" min="1000" max="${anoAtual+1}"></td>
+        <td><input type="number" class="form-control form-control-sm" name="m_ano[]" placeholder="${anoAtual}" min="1000" max="${anoAtual+1}" style="min-width:88px;"></td>
         <td><input type="text"   class="form-control form-control-sm" name="m_localizacao[]" placeholder="Ex: Estante B-1"></td>
         <td><input type="number" class="form-control form-control-sm" name="m_quantidade[]"  value="1" min="1" max="999"></td>
         <td class="text-center">
