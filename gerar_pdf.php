@@ -258,6 +258,201 @@ table.dt tbody td { padding:5px 8px; border-bottom:1px solid #fee2e2; }
 
 
 /* ════════════════════════════════════════════════════════════
+   TIPO: CONSULTAS (diário / semanal / anual)
+════════════════════════════════════════════════════════════ */
+} elseif ($tipo === 'consultas') {
+    $dataIni = sanitizeInput($_POST['data_ini'] ?? date('Y-m-d'));
+    $dataFim = sanitizeInput($_POST['data_fim'] ?? date('Y-m-d'));
+    $periodo = sanitizeInput($_POST['periodo']  ?? 'dia');
+    $periodoLabel = match($periodo) {
+        'semana' => 'Relatório Semanal de Consultas',
+        'mes'    => 'Relatório Mensal de Consultas',
+        'ano'    => 'Relatório Anual de Consultas — ' . date('Y'),
+        default  => 'Relatório Diário — ' . date('d/m/Y', strtotime($dataIni)),
+    };
+    $stC = $pdo->prepare("SELECT c.*, l.autor FROM consultas c LEFT JOIN livros l ON c.livro_id = l.id WHERE c.data_consulta BETWEEN ? AND ? ORDER BY c.data_consulta ASC, c.hora_consulta ASC");
+    $stC->execute([$dataIni, $dataFim]);
+    $consultas = $stC->fetchAll();
+    $stTop = $pdo->prepare("SELECT titulo_consulta, COUNT(*) AS total FROM consultas WHERE data_consulta BETWEEN ? AND ? GROUP BY titulo_consulta ORDER BY total DESC LIMIT 10");
+    $stTop->execute([$dataIni, $dataFim]);
+    $topC = $stTop->fetchAll();
+    $totalC = count($consultas);
+    $listaC = count(array_filter($consultas, fn($c) => $c['adicionou_lista']));
+    $uniqueAlunos = count(array_unique(array_column($consultas, 'nome_aluno')));
+
+    ob_start(); ?>
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:DejaVu Sans,Arial,sans-serif; font-size:10px; color:#1a1a2e; }
+.hdr { background:#4f46e5; color:#fff; padding:24px 30px 18px; }
+.hdr h1 { font-size:17px; font-weight:700; margin-bottom:3px; }
+.hdr .sub { color:rgba(255,255,255,.6); font-size:9px; }
+.hdr .meta { float:right; text-align:right; font-size:8.5px; color:rgba(255,255,255,.6); margin-top:-34px; }
+.hdr .meta strong { display:block; color:#fff; font-size:9.5px; }
+.body { padding:18px 30px 55px; }
+.summ { display:flex; gap:8px; margin-bottom:16px; }
+.sc { flex:1; padding:10px; border-radius:7px; text-align:center; border:1.5px solid; }
+.sc-val { font-size:18px; font-weight:900; }
+.sc-lbl { font-size:7.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#6b7280; margin-top:2px; }
+.c-p { background:#f5f3ff; border-color:#ddd6fe; } .c-p .sc-val { color:#6366f1; }
+.c-b { background:#eff6ff; border-color:#dbeafe; } .c-b .sc-val { color:#3b82f6; }
+.c-g { background:#f0fdf4; border-color:#bbf7d0; } .c-g .sc-val { color:#22c55e; }
+.c-y { background:#fef9c3; border-color:#fde68a; } .c-y .sc-val { color:#854d0e; }
+.sec { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#6b7280;
+       padding-bottom:5px; border-bottom:2px solid #f0f2f5; margin:14px 0 8px; }
+.sec-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+table.dt { width:100%; border-collapse:collapse; font-size:9px; }
+table.dt thead th { background:#4f46e5; color:#fff; padding:6px 8px; font-size:8px; font-weight:700; text-transform:uppercase; }
+table.dt tbody tr:nth-child(even) td { background:#f8f9fb; }
+table.dt tbody td { padding:5px 8px; border-bottom:1px solid #f0f2f5; }
+.top-hd { background:#1a1a2e; }
+.rank { display:inline-block; width:16px; height:16px; border-radius:4px; text-align:center;
+        line-height:16px; font-size:8px; font-weight:800; }
+.rk-1{background:#fef9c3;color:#b45309;}.rk-2{background:#f3f4f6;color:#6b7280;}
+.rk-3{background:#fef3c7;color:#92400e;}.rk-n{background:#eff6ff;color:#3b82f6;}
+.b-lista { background:#fef9c3; color:#854d0e; padding:1px 5px; border-radius:99px; font-size:7px; font-weight:700; }
+.hora { font-family:monospace; background:#f0f9ff; color:#0369a1; padding:1px 5px; border-radius:4px; }
+.ftr { position:fixed; bottom:0; left:0; right:0; background:#f8f9fb; border-top:1px solid #e8eaf0;
+       padding:6px 30px; text-align:center; font-size:8px; color:#9ca3af; }
+</style></head><body>
+<div class="hdr">
+  <div class="meta"><strong><?= $dataGeracao ?></strong>ISPCAN — Biblioteca</div>
+  <div style="font-size:16px;margin-bottom:6px;">&#127891;</div>
+  <h1><?= htmlspecialchars($periodoLabel, ENT_QUOTES, 'UTF-8') ?></h1>
+  <p class="sub">Período: <?= date('d/m/Y', strtotime($dataIni)) ?> a <?= date('d/m/Y', strtotime($dataFim)) ?></p>
+</div>
+<div class="body">
+  <div class="summ">
+    <div class="sc c-p"><div class="sc-val"><?= $totalC ?></div><div class="sc-lbl">Total Consultas</div></div>
+    <div class="sc c-b"><div class="sc-val"><?= $uniqueAlunos ?></div><div class="sc-lbl">Alunos</div></div>
+    <div class="sc c-g"><div class="sc-val"><?= count($topC) ?></div><div class="sc-lbl">Títulos Distintos</div></div>
+    <div class="sc c-y"><div class="sc-val"><?= $listaC ?></div><div class="sc-lbl">Lista de Compras</div></div>
+  </div>
+  <?php if (!empty($topC)): ?>
+  <div class="sec"><span class="sec-dot" style="background:#f59e0b;"></span>Livros Mais Consultados</div>
+  <table class="dt">
+    <thead><tr class="top-hd"><th>#</th><th>Título</th><th>Consultas</th></tr></thead>
+    <tbody>
+    <?php foreach ($topC as $i => $t): $rc=match($i){0=>'rk-1',1=>'rk-2',2=>'rk-3',default=>'rk-n'}; ?>
+    <tr>
+      <td><span class="rank <?= $rc ?>"><?= $i+1 ?></span></td>
+      <td><strong><?= htmlspecialchars($t['titulo_consulta'],ENT_QUOTES,'UTF-8') ?></strong></td>
+      <td><span style="background:#6366f1;color:#fff;padding:1px 8px;border-radius:20px;font-size:8px;font-weight:700;"><?= $t['total'] ?></span></td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+  <?php endif; ?>
+  <div class="sec"><span class="sec-dot" style="background:#6366f1;"></span>Registo Detalhado (<?= $totalC ?>)</div>
+  <?php if (empty($consultas)): ?>
+  <p style="text-align:center;color:#9ca3af;padding:14px;">Nenhuma consulta no período.</p>
+  <?php else: ?>
+  <table class="dt">
+    <thead><tr><th>#</th><th>Aluno</th><th>Livro Consultado</th><th>Data</th><th>Hora</th><th>Obs.</th></tr></thead>
+    <tbody>
+    <?php foreach ($consultas as $c): ?>
+    <tr>
+      <td style="color:#9ca3af;"><?= $c['id'] ?></td>
+      <td><strong><?= htmlspecialchars($c['nome_aluno'],ENT_QUOTES,'UTF-8') ?></strong></td>
+      <td><?= htmlspecialchars($c['titulo_consulta'],ENT_QUOTES,'UTF-8') ?><?php if($c['adicionou_lista']): ?> <span class="b-lista">compra</span><?php endif; ?></td>
+      <td style="white-space:nowrap;"><?= date('d/m/Y',strtotime($c['data_consulta'])) ?></td>
+      <td><span class="hora"><?= substr($c['hora_consulta'],0,5) ?></span></td>
+      <td style="color:#6b7280;"><?= htmlspecialchars($c['observacoes']??'—',ENT_QUOTES,'UTF-8') ?></td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+  <?php endif; ?>
+</div>
+<div class="ftr"><strong>Sistema de Gestão de Biblioteca — ISPCAN</strong> — <?= htmlspecialchars($periodoLabel,ENT_QUOTES,'UTF-8') ?> — Gerado em <?= $dataGeracao ?></div>
+</body></html>
+    <?php
+    $html     = ob_get_clean();
+    $filename = 'consultas_' . $periodo . '_' . date('Y-m-d') . '.pdf';
+
+
+/* ════════════════════════════════════════════════════════════
+   TIPO: LISTA DE COMPRAS
+════════════════════════════════════════════════════════════ */
+} elseif ($tipo === 'lista_compras') {
+    $itens  = $pdo->query("SELECT * FROM lista_compras ORDER BY CASE status WHEN 'pendente' THEN 1 WHEN 'encomendado' THEN 2 WHEN 'comprado' THEN 3 ELSE 4 END, data_solicitacao DESC")->fetchAll();
+    $totais = $pdo->query("SELECT status, COUNT(*) AS n FROM lista_compras GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $totalLC = count($itens);
+    $sBg  = ['pendente'=>'#fef9c3','encomendado'=>'#eff6ff','comprado'=>'#f0fdf4','negado'=>'#fef2f2'];
+    $sClr = ['pendente'=>'#854d0e','encomendado'=>'#1d4ed8','comprado'=>'#15803d','negado'=>'#b91c1c'];
+    $sLbl = ['pendente'=>'Pendente','encomendado'=>'Encomendado','comprado'=>'Comprado','negado'=>'Negado'];
+
+    ob_start(); ?>
+<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:DejaVu Sans,Arial,sans-serif; font-size:10px; color:#1a1a2e; }
+.hdr { background:#d97706; color:#fff; padding:24px 30px 18px; }
+.hdr h1 { font-size:17px; font-weight:700; }
+.hdr .sub { color:rgba(255,255,255,.65); font-size:9px; margin-top:3px; }
+.hdr .meta { float:right; text-align:right; font-size:8.5px; color:rgba(255,255,255,.6); margin-top:-34px; }
+.hdr .meta strong { display:block; color:#fff; font-size:9.5px; }
+.body { padding:18px 30px 55px; }
+.summ { display:flex; gap:8px; margin-bottom:16px; }
+.sc { flex:1; padding:10px; border-radius:7px; text-align:center; border:1.5px solid; }
+.sc-val { font-size:18px; font-weight:900; }
+.sc-lbl { font-size:7.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:#6b7280; margin-top:2px; }
+.sec { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#6b7280;
+       padding-bottom:5px; border-bottom:2px solid #f0f2f5; margin:14px 0 8px; }
+table.dt { width:100%; border-collapse:collapse; font-size:9px; }
+table.dt thead th { background:#92400e; color:#fff; padding:6px 8px; font-size:8px; font-weight:700; text-transform:uppercase; }
+table.dt tbody tr:nth-child(even) td { background:#fffbeb; }
+table.dt tbody td { padding:5px 8px; border-bottom:1px solid #fef3c7; }
+.badge { display:inline-block; padding:1px 7px; border-radius:99px; font-size:7.5px; font-weight:700; }
+.ftr { position:fixed; bottom:0; left:0; right:0; background:#f8f9fb; border-top:1px solid #e8eaf0;
+       padding:6px 30px; text-align:center; font-size:8px; color:#9ca3af; }
+</style></head><body>
+<div class="hdr">
+  <div class="meta"><strong><?= $dataGeracao ?></strong>ISPCAN — Biblioteca</div>
+  <div style="font-size:16px;margin-bottom:6px;">&#128722;</div>
+  <h1>Lista de Compras — Livros Solicitados</h1>
+  <p class="sub"><?= $totalLC ?> item<?= $totalLC!=1?'s':'' ?> registado<?= $totalLC!=1?'s':'' ?></p>
+</div>
+<div class="body">
+  <div class="summ">
+  <?php foreach (['pendente','encomendado','comprado','negado'] as $st): $n=$totais[$st]??0; ?>
+  <div class="sc" style="background:<?= $sBg[$st] ?>;border-color:<?= $sBg[$st] ?>;">
+    <div class="sc-val" style="color:<?= $sClr[$st] ?>"><?= $n ?></div>
+    <div class="sc-lbl"><?= $sLbl[$st] ?></div>
+  </div>
+  <?php endforeach; ?>
+  </div>
+  <div class="sec">Lista de Livros a Adquirir</div>
+  <?php if (empty($itens)): ?>
+  <p style="text-align:center;color:#9ca3af;padding:14px;">Lista vazia.</p>
+  <?php else: ?>
+  <table class="dt">
+    <thead><tr><th>#</th><th>Título</th><th>Autor</th><th>Solicitado por</th><th>Data</th><th>Estado</th><th>Obs.</th></tr></thead>
+    <tbody>
+    <?php foreach ($itens as $item): ?>
+    <tr>
+      <td style="color:#9ca3af;"><?= $item['id'] ?></td>
+      <td><strong><?= htmlspecialchars($item['titulo'],ENT_QUOTES,'UTF-8') ?></strong></td>
+      <td style="color:#6b7280;"><?= htmlspecialchars($item['autor']??'—',ENT_QUOTES,'UTF-8') ?></td>
+      <td><?= htmlspecialchars($item['solicitado_por'],ENT_QUOTES,'UTF-8') ?></td>
+      <td style="white-space:nowrap;"><?= date('d/m/Y',strtotime($item['data_solicitacao'])) ?></td>
+      <td><span class="badge" style="background:<?= $sBg[$item['status']] ?>;color:<?= $sClr[$item['status']] ?>;"><?= $sLbl[$item['status']] ?></span></td>
+      <td style="color:#6b7280;"><?= htmlspecialchars($item['observacoes']??'—',ENT_QUOTES,'UTF-8') ?></td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+  <?php endif; ?>
+</div>
+<div class="ftr"><strong>Sistema de Gestão de Biblioteca — ISPCAN</strong> — Lista de Compras — Gerado em <?= $dataGeracao ?></div>
+</body></html>
+    <?php
+    $html     = ob_get_clean();
+    $filename = 'lista_compras_' . date('Y-m-d') . '.pdf';
+
+
+/* ════════════════════════════════════════════════════════════
    TIPO: GERAL (padrão)
 ════════════════════════════════════════════════════════════ */
 } else {

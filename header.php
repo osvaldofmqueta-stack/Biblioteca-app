@@ -76,6 +76,27 @@ function navActive(string $page, string $current): string {
                         <?php endif; ?>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link<?php echo navActive('consultas.php', $currentPage); ?>"
+                       href="consultas.php">
+                        <i class="fas fa-user-graduate"></i> Consultas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link<?php echo navActive('lista_compras.php', $currentPage); ?>"
+                       href="lista_compras.php"
+                       style="<?php echo $currentPage==='lista_compras.php' ? '' : ''; ?>">
+                        <i class="fas fa-cart-shopping"></i> Compras
+                        <?php
+                        $pendLC = 0;
+                        if (isset($GLOBALS['pdo'])) {
+                            $pendLC = (int)($GLOBALS['pdo']->query("SELECT COUNT(*) FROM lista_compras WHERE status='pendente'")->fetchColumn() ?? 0);
+                        }
+                        if ($pendLC > 0): ?>
+                        <span class="nav-badge"><?php echo $pendLC; ?></span>
+                        <?php endif; ?>
+                    </a>
+                </li>
                 <?php endif; ?>
 
                 <?php if (function_exists('isAdmin') && isAdmin()): ?>

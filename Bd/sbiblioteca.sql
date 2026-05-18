@@ -247,6 +247,43 @@ INSERT IGNORE INTO `configuracoes` (`chave`, `valor`) VALUES
   ('email_contacto', ''),
   ('morada', 'Instituto Superior Politécnico Cardeal do Nascimento');
 
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `consultas`
+--
+
+CREATE TABLE IF NOT EXISTS `consultas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nome_aluno` varchar(255) NOT NULL,
+  `livro_id` int(11) DEFAULT NULL,
+  `titulo_consulta` varchar(255) NOT NULL,
+  `data_consulta` date NOT NULL,
+  `hora_consulta` time NOT NULL,
+  `observacoes` text DEFAULT NULL,
+  `adicionou_lista` tinyint(1) DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `idx_data` (`data_consulta`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `lista_compras`
+--
+
+CREATE TABLE IF NOT EXISTS `lista_compras` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(255) NOT NULL,
+  `autor` varchar(100) DEFAULT NULL,
+  `solicitado_por` varchar(255) NOT NULL,
+  `data_solicitacao` date NOT NULL,
+  `status` enum('pendente','encomendado','comprado','negado') DEFAULT 'pendente',
+  `observacoes` text DEFAULT NULL,
+  `consulta_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
