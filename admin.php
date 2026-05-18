@@ -513,52 +513,9 @@ require 'header.php';
             <div class="d-flex gap-2">
                 <input type="text" id="userSearch" class="form-control form-control-sm"
                        placeholder="&#128269; Filtrar utilizadores…" style="max-width:200px;">
-                <button class="btn btn-primary btn-sm" data-bs-toggle="collapse" data-bs-target="#formNovoUser">
-                    <i class="fas fa-user-plus me-1"></i> Novo
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovoUser">
+                    <i class="fas fa-user-plus me-1"></i> Novo Utilizador
                 </button>
-            </div>
-        </div>
-
-        <!-- Adicionar utilizador -->
-        <div class="collapse mb-4" id="formNovoUser">
-            <div class="cfg-card">
-                <p class="cfg-section-label"><i class="fas fa-user-plus me-1"></i> Criar Novo Utilizador</p>
-                <form method="POST" action="admin_acao.php" id="formCriarUser">
-                    <input type="hidden" name="acao" value="novo_usuario">
-                    <input type="hidden" name="redirect_tab" value="usuarios">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Nome <span style="color:#ef4444;">*</span></label>
-                            <input type="text" name="nome" id="newNome" class="form-control" placeholder="Nome completo" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">E-mail (login) <span style="color:#ef4444;">*</span></label>
-                            <input type="email" name="email" id="newEmail" class="form-control" placeholder="email@exemplo.com" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Senha <span style="color:#ef4444;">*</span></label>
-                            <div class="input-group">
-                                <input type="text" name="senha" id="newSenha" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
-                                <button type="button" class="btn btn-outline-secondary" onclick="gerarSenha()" title="Gerar senha aleatória">
-                                    <i class="fas fa-shuffle"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Nível de Acesso</label>
-                            <select name="nivel_acesso" class="form-select">
-                                <option value="usuario">Utilizador</option>
-                                <option value="bibliotecario">Bibliotecário</option>
-                                <option value="admin">Administrador</option>
-                            </select>
-                        </div>
-                        <div class="col-md-1 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100" title="Criar utilizador">
-                                <i class="fas fa-save"></i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
             </div>
         </div>
 
@@ -680,6 +637,120 @@ require 'header.php';
         </div>
         <?php endforeach; ?>
         </div><!-- /userList -->
+
+        <!-- ── Modal: Novo Utilizador ──────────────────────────────── -->
+        <div class="modal fade" id="modalNovoUser" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width:500px;">
+                <div class="modal-content">
+                    <div class="modal-header" style="background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border-radius:12px 12px 0 0;">
+                        <h5 class="modal-title fw-bold"><i class="fas fa-user-plus me-2"></i>Novo Utilizador</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form method="POST" action="admin_acao.php">
+                        <input type="hidden" name="acao" value="novo_usuario">
+                        <input type="hidden" name="redirect_tab" value="usuarios">
+                        <div class="modal-body p-4">
+
+                            <!-- Nome -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nome completo <span style="color:#ef4444;">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user text-muted"></i></span>
+                                    <input type="text" name="nome" class="form-control" placeholder="Ex: João Silva" required>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">E-mail (usado para login) <span style="color:#ef4444;">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-at text-muted"></i></span>
+                                    <input type="email" name="email" class="form-control" placeholder="email@exemplo.com" required>
+                                </div>
+                            </div>
+
+                            <!-- Senha -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Senha <span style="color:#ef4444;">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+                                    <input type="text" name="senha" id="modalNewSenha" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="gerarSenhaModal()" title="Gerar senha aleatória">
+                                        <i class="fas fa-shuffle"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text"><i class="fas fa-info-circle me-1"></i>A senha ficará visível no cartão do utilizador após criação.</div>
+                            </div>
+
+                            <!-- Nível de acesso com cards visuais -->
+                            <div class="mb-1">
+                                <label class="form-label fw-semibold">Nível de Acesso <span style="color:#ef4444;">*</span></label>
+                                <div class="d-flex gap-2">
+                                    <label class="role-card flex-fill text-center" style="cursor:pointer;">
+                                        <input type="radio" name="nivel_acesso" value="usuario" class="d-none role-radio" checked>
+                                        <div class="role-card-inner p-3 border rounded-3" style="transition:.15s;">
+                                            <div style="font-size:1.4rem;">👤</div>
+                                            <div class="fw-bold" style="font-size:0.82rem;">Utilizador</div>
+                                            <div style="font-size:0.7rem;color:#6b7280;">Consulta e empréstimos</div>
+                                        </div>
+                                    </label>
+                                    <label class="role-card flex-fill text-center" style="cursor:pointer;">
+                                        <input type="radio" name="nivel_acesso" value="bibliotecario" class="d-none role-radio">
+                                        <div class="role-card-inner p-3 border rounded-3" style="transition:.15s;">
+                                            <div style="font-size:1.4rem;">📚</div>
+                                            <div class="fw-bold" style="font-size:0.82rem;">Bibliotecário</div>
+                                            <div style="font-size:0.7rem;color:#6b7280;">Gerir livros e devoluções</div>
+                                        </div>
+                                    </label>
+                                    <label class="role-card flex-fill text-center" style="cursor:pointer;">
+                                        <input type="radio" name="nivel_acesso" value="admin" class="d-none role-radio">
+                                        <div class="role-card-inner p-3 border rounded-3" style="transition:.15s;">
+                                            <div style="font-size:1.4rem;">🛡</div>
+                                            <div class="fw-bold" style="font-size:0.82rem;">Administrador</div>
+                                            <div style="font-size:0.7rem;color:#6b7280;">Acesso total ao sistema</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-user-plus me-1"></i> Criar Utilizador
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        .role-card-inner { border-color: #e2e8f0 !important; background:#fafafa; }
+        .role-card input:checked ~ .role-card-inner {
+            border-color: #6366f1 !important;
+            background: #eef2ff;
+            box-shadow: 0 0 0 2px #6366f140;
+        }
+        .role-card:hover .role-card-inner { border-color: #a5b4fc !important; background:#f5f3ff; }
+        .dark-mode .role-card-inner { background:#1e293b; border-color:#334155 !important; }
+        .dark-mode .role-card input:checked ~ .role-card-inner { background:#1e1b4b; border-color:#6366f1 !important; }
+        </style>
+
+        <script>
+        /* Highlight role cards on change */
+        document.querySelectorAll('.role-radio').forEach(r => {
+            r.addEventListener('change', () => {
+                document.querySelectorAll('.role-radio').forEach(x => x.checked);
+            });
+        });
+        function gerarSenhaModal() {
+            const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#!';
+            let pw = '';
+            for (let i=0;i<10;i++) pw += chars[Math.floor(Math.random()*chars.length)];
+            document.getElementById('modalNewSenha').value = pw;
+        }
+        </script>
 
         <!-- ── Modal: Editar Utilizador ────────────────────────────── -->
         <div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
