@@ -643,4 +643,4 @@ $dompdf = new Dompdf($options);
 $dompdf->loadHtml($html, 'UTF-8');
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
-$dompdf->stream($filename, ['Attachment' => true]);
+$dompdf->stream($filename, ['Attachment' => 0]);

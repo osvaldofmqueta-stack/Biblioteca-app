@@ -150,7 +150,7 @@ require 'header.php';
                 </button>
                 <ul class="dropdown-menu">
                     <li>
-                        <form method="post" action="gerar_pdf.php">
+                        <form method="post" action="gerar_pdf.php" target="_blank">
                             <input type="hidden" name="tipo" value="consultas">
                             <input type="hidden" name="periodo" value="dia">
                             <input type="hidden" name="data_ini" value="<?= h(date('Y-m-d')) ?>">
@@ -159,7 +159,7 @@ require 'header.php';
                         </form>
                     </li>
                     <li>
-                        <form method="post" action="gerar_pdf.php">
+                        <form method="post" action="gerar_pdf.php" target="_blank">
                             <input type="hidden" name="tipo" value="consultas">
                             <input type="hidden" name="periodo" value="semana">
                             <input type="hidden" name="data_ini" value="<?= h(date('Y-m-d', strtotime('monday this week'))) ?>">
@@ -168,7 +168,7 @@ require 'header.php';
                         </form>
                     </li>
                     <li>
-                        <form method="post" action="gerar_pdf.php">
+                        <form method="post" action="gerar_pdf.php" target="_blank">
                             <input type="hidden" name="tipo" value="consultas">
                             <input type="hidden" name="periodo" value="ano">
                             <input type="hidden" name="data_ini" value="<?= h(date('Y-01-01')) ?>">
@@ -178,7 +178,7 @@ require 'header.php';
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                        <form method="post" action="gerar_pdf.php">
+                        <form method="post" action="gerar_pdf.php" target="_blank">
                             <input type="hidden" name="tipo" value="lista_compras">
                             <button type="submit" class="dropdown-item"><i class="fas fa-cart-shopping me-2 text-purple" style="color:#a855f7;"></i>Lista de Compras</button>
                         </form>

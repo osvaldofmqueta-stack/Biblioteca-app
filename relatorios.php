@@ -152,7 +152,7 @@ require 'header.php';
                 <p>Análise de actividade da biblioteca. Filtre por período e exporte em PDF.</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <form method="post" action="gerar_pdf.php" class="d-inline">
+                <form method="post" action="gerar_pdf.php" class="d-inline" target="_blank">
                     <input type="hidden" name="tipo" value="geral">
                     <input type="hidden" name="data_inicio" value="<?= h($dataInicio) ?>">
                     <input type="hidden" name="data_fim"    value="<?= h($dataFim) ?>">
@@ -160,14 +160,14 @@ require 'header.php';
                         <i class="fas fa-file-pdf"></i> Relatório Geral
                     </button>
                 </form>
-                <form method="post" action="gerar_pdf.php" class="d-inline">
+                <form method="post" action="gerar_pdf.php" class="d-inline" target="_blank">
                     <input type="hidden" name="tipo" value="livros">
                     <button type="submit" class="pdf-btn pdf-btn-blue">
                         <i class="fas fa-book"></i> Acervo de Livros
                     </button>
                 </form>
                 <?php if (isAdmin()): ?>
-                <form method="post" action="gerar_pdf.php" class="d-inline">
+                <form method="post" action="gerar_pdf.php" class="d-inline" target="_blank">
                     <input type="hidden" name="tipo" value="usuarios">
                     <button type="submit" class="pdf-btn pdf-btn-dark">
                         <i class="fas fa-users"></i> Lista de Utilizadores
@@ -175,7 +175,7 @@ require 'header.php';
                 </form>
                 <?php endif; ?>
                 <?php if (!empty($atrasadosList)): ?>
-                <form method="post" action="gerar_pdf.php" class="d-inline">
+                <form method="post" action="gerar_pdf.php" class="d-inline" target="_blank">
                     <input type="hidden" name="tipo" value="atrasos">
                     <button type="submit" class="pdf-btn" style="background:#f97316;color:#fff;">
                         <i class="fas fa-triangle-exclamation"></i> Atrasos (<?= count($atrasadosList) ?>)

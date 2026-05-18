@@ -79,7 +79,7 @@ require 'header.php';
             <button class="btn btn-warning btn-sm text-white" data-bs-toggle="modal" data-bs-target="#modalAddCompra">
                 <i class="fas fa-plus me-1"></i> Adicionar
             </button>
-            <form method="post" action="gerar_pdf.php" class="d-inline">
+            <form method="post" action="gerar_pdf.php" class="d-inline" target="_blank">
                 <input type="hidden" name="tipo" value="lista_compras">
                 <button type="submit" class="btn btn-sm btn-outline-danger">
                     <i class="fas fa-file-pdf me-1"></i> Exportar PDF
